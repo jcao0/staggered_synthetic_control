@@ -1,4 +1,5 @@
-
+tmp = matlab.desktop.editor.getActive;
+cd(fileparts(tmp.Filename));
 clear
 tic 
 rng(7)
@@ -9,18 +10,18 @@ alpha_sig = .05;
 
 %% DATA CLEARNING
 
-data = readtable('data_hr.csv');
+data = readtable('data_boardgendereige.csv');
 % head(data,5)
 N = length(unique(table2array(unique(data(:,1))))); % number of units
 T1 = length(unique(table2array(unique(data(:,3))))); % number of units
-Y = reshape(table2array(data(:,14)),T1,N)'; 
+Y = reshape(table2array(data(:,7)),T1,N)'; 
 D = reshape(table2array(data(:,4)),T1,N)'; 
 D1 = reshape(table2array(data(:,5)),T1,N)'; 
 D2 = reshape(table2array(data(:,6)),T1,N)'; 
 T = find(sum(D),1)-1; % number of pre-treatment periods
 S_max = T1-T; % maximum number of post-treatment periods
 
-S = S_max-23; % truncate data to avoid extrapolating too far
+S = S_max-3; % truncate data to avoid extrapolating too far
 T1 = T+S; % total number of periods
 Y = Y(:,1:T1); % outcome 
 D = D(:,1:T1); % all-time treatment status
@@ -40,7 +41,7 @@ V_mat = output.V_mat;
 B_hat = output.B_hat;
 
 % display weights for a certian unit
-id_unit = 7; % unit of interest
+id_unit = 9; % unit of interest
 weights = round(B_hat(id_unit,:)',4);
 units = unique(table2array(unique(data(:,2))));
 weight_table = table(units,weights);
@@ -110,57 +111,9 @@ for s = 1 : S_min
     ub_vec(s) = ub;
 end
 
-%% plot1 - absolute level treatment effects for two policies
+
+%% plot  - residual plot
 figure(1)
-
-hold on 
-plot([.5,S+.5],[0,0],'--k');
-p1 = errorbar(1:S1,gamma_hat_1,ub_1,-lb_1,'Color',...
-    [1,0.4,0.3],'LineStyle','none','CapSize',10);
-p2 = errorbar(1:S2,gamma_hat_2,ub_2,-lb_2,'Color',...
-    [0,.6,.6],'LineStyle','none','CapSize',10);
-p3 = plot(1:S1,gamma_hat_1,'Color',[1,0.4,0.3],'LineWidth',2);
-p4 = plot(1:S2,gamma_hat_2,'--','Color',[0,.6,.6],'LineWidth',2);
-
-hold off
-
-p1.Marker = 'o';
-p1.MarkerSize = 6;
-p2.Marker = 'o';
-p2.MarkerSize = 6;
-p1.LineWidth = 1.5;
-p2.LineWidth = 1.5;
-
-xlabel('event time','FontSize',15)
-ylabel('ATT estimates','FontSize',15)
-xlim([.5 S+.5])
-ylim([-10,10])
-legend([p3 p4],{'Quota','Disclosure'},'Location',...
-    'northwest','FontSize',15);
-
-
-% %% plot2 - differece 
-% figure(2)
-% 
-% p = errorbar(1:S_min,gamma_hat_diff,ub_vec,-lb_vec);
-% 
-% hold on
-% plot([.5,S+.5],[0,0],'--k')
-% hold off
-% 
-% xlim([.5 12.5])
-% ylim([-10,10])
-% xlabel('event time')
-% ylabel('ATT estimate difference')
-% p.Marker = 'o';
-% p.LineWidth = 1.5;
-% %xlim([.5 S_min+.5])
-% lgd = legend('Quota - Disclosure','Location','northwest');
-% lgd.FontSize = 12;
-
-
-%% plot 3 - residual plot
-figure(3)
 
 output = att_event_ci(Y,D,S,alpha_sig);
 te_mat_hat = output.te_mat_hat;
@@ -195,13 +148,12 @@ p2 = plot(res_mat_2','--','Color',[0,.6,.6],'LineWidth',2);
 hold off
 
 xlim([1,T+S])
-ylim([-20,20])
+ylim([y_min,y_max])
 vline(T,'--k');
 xlabel('time','FontSize',15)
 ylabel('treatment effects','FontSize',15)
 title('Calendar Time','FontSize',15)
-lgd = legend([p1(1) p2(1)],'Quota','Disclosure',...
-    'Location','northwest','FontSize',12);
+lgd = legend([p1(1) p2(1)],'Quota','Disclosure','Location','northwest','FontSize',12);
 
 
 % residuals/treatment effects of ever-treated units plot (recentered at
@@ -221,22 +173,22 @@ for i = 1 : size(res_mat,1)
             [0,.6,.6],'LineWidth',2);
     end
 end
+vline(0,'--k');
 hold off
 x_min_plot = -5; % left limit of plot 
-xlim([x_min_plot, S])
-ylim([-20,20])
-vline(0,'--k');
+xlim([x_min_plot, x_max])
+ylim([y_min,y_max])
 xlabel('time relative to first treated','FontSize',15)
 ylabel('treatment effects','FontSize',15)
 title('Event Time','FontSize',15)
-lgd = legend([p1(1) p2(1)],'Quota','Disclosure',...
-    'Location','northwest','FontSize',12);
+lgd = legend([p1(1) p2(1)],'Quota','Disclosure','Location','northwest','FontSize',12);
 
 
 %% save graphs
 
-saveas(figure(1),'graph6a.png')
-saveas(figure(3),'graph6b.png')
+saveas(figure(1),'graph1.png')
+
+
 
 
 

@@ -3,10 +3,9 @@
 *Eurostat weekly work hours data*
 *Last updated 03/08/2020*
 ****************************************************
-set more off
 
 /*
-Source: Eurostat lfsq_ewhuis https://ec.europa.eu/eurostat/data/database
+Source: Eurostat lfsq_ewhuis https://ec.europa.eu/eurostat/databrowser/view/lfsq_ewhuis/default/table
 Purpose: clean data and format for matlab
 */
 
@@ -15,6 +14,11 @@ isco08 is occupation: 1 managers 2 professionals 3 technicians and associate pro
 6 skilled agri forestry fishery 7 craft and related trades 8 plants and machine 9 elementary 0 armed forces
 worktime is PT FT or TOTAL
 */
+
+**set the working directory to the folder containing this do file
+cap cd "~/replication_files/data cleaning/LFS work hours data"
+set more off
+
 
 **step 1 import
 import excel "lfsq_ewhuis.xlsx", sheet("for stata") firstrow clear

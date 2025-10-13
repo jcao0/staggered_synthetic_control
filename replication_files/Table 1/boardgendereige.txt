@@ -1,5 +1,0 @@
-		(1)	(2)	(3)	(4)	(5)	(6)
-VARIABLES	LABELS	N	mean	sd	p25	p50	p75
-							
-fratio	Board female ratio (in percentage)	442.00	14.64	8.86	8.10	12.60	19.00
-							

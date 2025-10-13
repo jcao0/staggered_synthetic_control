@@ -10,6 +10,8 @@ Source: EIGE https://eige.europa.eu/gender-statistics/dgs/indicator/wmidm_bus_bu
 Purpose: clean data and format for matlab
 */
 
+**set the working directory to the folder containing this do file
+cap cd "~/replication_files/data cleaning/EIGE board gender data"
 set more off
 
 **step 1
