@@ -3,7 +3,7 @@ cd(fileparts(tmp.Filename));
 clear
 tic 
 rng(7)
-addpath('functions');
+addpath(genpath('functions'));
 alpha_sig = .05;
 % warning('off','all')
 
@@ -13,7 +13,7 @@ alpha_sig = .05;
 data = readtable('data_boardgendereige.csv');
 % head(data,5)
 N = length(unique(table2array(unique(data(:,1))))); % number of units
-T1 = length(unique(table2array(unique(data(:,3))))); % number of units
+T1 = length(unique(table2array(unique(data(:,3))))); % number of periods
 Y = reshape(table2array(data(:,7)),T1,N)'; 
 D = reshape(table2array(data(:,4)),T1,N)'; 
 D1 = reshape(table2array(data(:,5)),T1,N)'; 
@@ -30,7 +30,6 @@ D1 = D1(:,1:T1);
 D2 = D2(:,1:T1);
 D1_S = D1(:,T+1:T+S);
 D2_S = D2(:,T+1:T+S);
-
 
 %% ESTIMATION AND INFERENCE
 
@@ -110,11 +109,7 @@ for s = 1 : S_min
     lb_vec(s) = lb;
     ub_vec(s) = ub;
 end
-
-
-%% plot  - residual plot
-figure(1)
-
+%% data for plot
 output = att_event_ci(Y,D,S,alpha_sig);
 te_mat_hat = output.te_mat_hat;
 att_hat = output.att_hat;
@@ -124,69 +119,199 @@ res_mat = output.res_mat;
 event_time_mat = output.event_time_mat;
 B_hat = output.B_hat;
 
-D1_temp = D1;
-D2_temp = D2;
+D1_temp = D1_S;
+D2_temp = D2_S;
 ind_temp = sum(D,2)==0;
 D1_temp(ind_temp,:) = [];
 D2_temp(ind_temp,:) = [];
-res_mat_1 = res_mat(~(sum(D1_temp,2)==0),:);
-res_mat_2 = res_mat(~(sum(D2_temp,2)==0),:);
+res_mat_1 = res_mat((sum(D1_temp,2)>0),:);
+res_mat_2 = res_mat((sum(D2_temp,2)>0),:);% does not include germany, as it takes both quota and disclosure
+
 
 % residuals/treatment effects of ever-treated units plot
 y_min = min(min(res_mat));
 y_max = max(max(res_mat));
 
+% select units of policy 1
+units_p1 = (sum(D1_S,2) > 0);
+units_p1 = units(units_p1);
+% select units of policy 2
+units_p2 = (sum(D2_S,2) > 0);
+units_p2 = units(units_p2);
+
+% Full country names
+countries = {...
+    'Austria', 'Belgium', 'Bulgaria', 'Croatia', 'Cyprus', ...
+    'Czech Republic', 'Denmark', 'Estonia', 'France', 'Germany', ...
+    'Greece', 'Hungary', 'Ireland', 'Italy', 'Latvia', 'Lithuania', ...
+    'Luxembourg', 'Malta', 'Netherlands', 'Poland', 'Portugal', ...
+    'Romania', 'Slovakia', 'Slovenia', 'Sweden', 'United Kingdom'};
+
+% Corresponding abbreviations (2-letter or ISO codes)
+abbr = {...
+    'AT', 'BE', 'BG', 'HR', 'CY', ...
+    'CZ', 'DK', 'EE', 'FR', 'DE', ...
+    'GR', 'HU', 'IE', 'IT', 'LV', 'LT', ...
+    'LU', 'MT', 'NL', 'PL', 'PT', ...
+    'RO', 'SK', 'SI', 'SE', 'UK'};
+
+% Create mapping
+countryMap = containers.Map(countries, abbr);
+units_p1 = cellfun(@(x) countryMap(x), units_p1, 'UniformOutput', false);
+units_p2 = cellfun(@(x) countryMap(x), units_p2, 'UniformOutput', false);
+%% plot  - residual plo
+% residuals/treatment effects of ever-treated units plot
+fig = figure('Position', [616, 598, 33*70/3, 33*70/4]);
+policy = {'Quota', 'Disclosure'};
+colors     = {[1, 0.4, 0.3], [0,.6,.6]};
+linestyles = {'-', '--'};
+markers = {'o','+','^','s'};
+
 subplot(2,1,1)
+hold on
+plot([0,T+S+1],[0,0],'--k','HandleVisibility','off');
 
-h = zeros(1,3);
-h(1) = plot([0,T+S+1],[0,0],'--k','HandleVisibility','off');
+n1 = size(res_mat_1, 1);
+n2 = size(res_mat_2, 1);
+h = nan(max(n1,n2),length(policy));
 
+% plot for each country
+for i = 1:n1
+      % Plot
+      h(i,1) = plot(res_mat_1(i, :), ...
+        '-',...
+        'Color', [1, 0.4, 0.3], ...
+        'LineWidth', 2, ...
+        'Marker', markers{i}, ...
+        'MarkerSize', 10);
+end
+for i = 1:n2
+      % Plot
+      h(i,2) = plot(res_mat_2(i, :), ...
+        '--',...
+        'Color', [0,.6,.6], ...
+        'LineWidth', 2, ...
+        'Marker', markers{i}, ...
+        'MarkerSize', 10);
+end
 
-hold on 
-p1 = plot(res_mat_1','Color',[1,0.4,0.3],'LineWidth',2);
-p2 = plot(res_mat_2','--','Color',[0,.6,.6],'LineWidth',2);
-hold off
-
-xlim([1,T+S])
-ylim([y_min,y_max])
+xlim([1-0.5,T+S+0.5])
+ylim([y_min-0.5,y_max+1])
 vline(T,'--k');
 xlabel('time','FontSize',15)
 ylabel('treatment effects','FontSize',15)
 title('Calendar Time','FontSize',15)
-lgd = legend([p1(1) p2(1)],'Quota','Disclosure','Location','northwest','FontSize',12);
+
+h1 = ...
+legendflex(h(1:n1,1), units_p1, ...
+'ref', gca, ...
+'anchor', {'nw','nw'}, ...
+'buffer', [5 -5], ...
+'fontsize',12, ...
+'xscale',1.2, ...
+'title', 'Quota');
+sz = get(h1, 'position');
+wid_box = 1.2*sz(3);
+sz(3) = wid_box;     % Make the width larger
+set(h1,'position', sz);
+
+
+h2 = ...
+legendflex(h(1:n2,2), units_p2, ...
+'ref', h1, ...
+'anchor', {'sw','nw'}, ...
+'buffer', [0 -8], ...
+'fontsize', 12, ...
+'xscale',1.2, ...
+'box','on',...
+'title', 'Disclosure');
+sz = get(h2, 'position');
+sz(3) = wid_box;     % Make the heigth larger
+set(h2,'position', sz);
+
+box on
+hold off
+
 
 
 % residuals/treatment effects of ever-treated units plot (recentered at
 % first treatment time)
-subplot(2,1,2)
+event_time_mat1 = event_time_mat((sum(D1_temp,2)>0),:);
+event_time_mat2 = event_time_mat((sum(D2_temp,2)>0),:);
+res_mat_1 = res_mat((sum(D1_temp,2)>0),:);
+res_mat_2 = res_mat((sum(D2_temp,2)>0),:);
 x_min = min(min(event_time_mat));
 x_max = max(max(event_time_mat));
-plot([x_min-1,x_max+1],[0,0],'--k')
+
+subplot(2,1,2)
 hold on
-if_D1 = ~(sum(D1_temp,2)==0);
-for i = 1 : size(res_mat,1)
-    if if_D1(i) == 1
-        p1 = plot(event_time_mat(i,:),res_mat(i,:),'Color',...
-            [1,0.4,0.3],'LineWidth',2);
-    else
-        p2 = plot(event_time_mat(i,:),res_mat(i,:),'--','Color',...
-            [0,.6,.6],'LineWidth',2);
-    end
+plot([x_min-1,x_max+1],[0,0],'--k')
+
+n1 = size(event_time_mat1, 1);
+n2 = size(event_time_mat2, 1);
+h = nan(max(n1,n2),length(policy));
+
+
+% plot for each country
+for i = 1:n1
+      % Plot
+      h(i,1) = plot(event_time_mat1(i, :),res_mat_1(i, :), ...
+        '-',...
+        'Color', [1, 0.4, 0.3], ...
+        'LineWidth', 2, ...
+        'Marker', markers{i}, ...
+        'MarkerSize', 10);
 end
+for i = 1:n2
+      % Plot
+      h(i,2) = plot(event_time_mat2(i, :),res_mat_2(i, :), ...
+        '--',...
+        'Color', [0,.6,.6], ...
+        'LineWidth', 2, ...
+        'Marker', markers{i}, ...
+        'MarkerSize', 10);
+end
+
+
 vline(0,'--k');
-hold off
 x_min_plot = -5; % left limit of plot 
-xlim([x_min_plot, x_max])
-ylim([y_min,y_max])
+xlim([x_min_plot-0.5, x_max+0.5])
+ylim([y_min-0.5,y_max+1])
 xlabel('time relative to first treated','FontSize',15)
 ylabel('treatment effects','FontSize',15)
 title('Event Time','FontSize',15)
-lgd = legend([p1(1) p2(1)],'Quota','Disclosure','Location','northwest','FontSize',12);
 
+h1 = ...
+legendflex(h(1:n1,1), units_p1, ...
+'ref', gca, ...
+'anchor', {'nw','nw'}, ...
+'buffer', [5 -5], ...
+'fontsize',12, ...
+'xscale',1.2, ...
+'title', 'Quota');
+sz = get(h1, 'position');
+wid_box = 1.2*sz(3);
+sz(3) = wid_box;     % Make the width larger
+set(h1,'position', sz);
+
+h2 = ...
+legendflex(h(1:n2,2), units_p2, ...
+'ref', h1, ...
+'anchor', {'sw','nw'}, ...
+'buffer', [0 -8], ...
+'fontsize', 12, ...
+'xscale',1.2, ...
+'box','on',...
+'title', 'Disclosure');
+sz = get(h2, 'position');
+sz(3) = wid_box;     % Make the heigth larger
+set(h2,'position', sz);
+box on
+hold off
 
 %% save graphs
 
-saveas(figure(1),'graph1.png')
+saveas(fig,'graph1.png')
 
 
 
