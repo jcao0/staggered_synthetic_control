@@ -13,7 +13,7 @@ alpha_sig = .05;
 data = readtable('data_ft.csv');
 % head(data,5)
 N = length(unique(table2array(unique(data(:,1))))); % number of units
-T1 = length(unique(table2array(unique(data(:,3))))); % number of units
+T1 = length(unique(table2array(unique(data(:,3))))); % number of periods
 Y = reshape(table2array(data(:,9)),T1,N)'; 
 D = reshape(table2array(data(:,4)),T1,N)'; 
 D1 = reshape(table2array(data(:,5)),T1,N)'; 
