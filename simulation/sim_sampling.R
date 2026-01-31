@@ -1,9 +1,8 @@
 ## Simulation Study
 ## Replication Materials
 
-
 # This scripts generate simulated samples for different cases
-# One case is defined by a combination of N (number of units) and T0 (number of pre-treatment periods)
+# One case is defined by a combination of N (number of units) and T (number of pre-treatment periods)
 
 # %% set environment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 rm(list=ls(all=TRUE))
@@ -20,10 +19,10 @@ source("functions/sampling.R")
 sims<-100 # number of simulations per case
 
 # define cases
-TT0 <- c(50) # vector of target pre-treatment periods
+TT <- c(50) # vector of target pre-treatment periods
 NN  <- c(20) # vector of target units
 S <- 10 # number of post-treatment periods
-cases <- expand.grid(TT0 = TT0, NN = NN) # Create all combinations of TT0 and NN
+cases <- expand.grid(TT = TT, NN = NN) # Create all combinations of TT and NN
 ncases <- nrow(cases)
 
 # parameters for DGP
@@ -48,11 +47,11 @@ sim_data <- list()
 sim_data_mat <- list()  # for MATLAB-compatible structure
 for (case in 1:ncases) {
     N <- cases$NN[case]
-    T0 <- cases$TT0[case]
-    case_name <- paste0("N", N, "_T0", T0)
+    T <- cases$TT[case]
+    case_name <- paste0("N", N, "_T", T)
 
     cat("Simulate: sims = ", sims,
-        ", N = ", N, ", T0 = ", T0, ", S = ", S, "\n", sep = "")
+        ", N = ", N, ", T = ", T, ", S = ", S, "\n", sep = "")
     
     # generate treatment matrix
     repeat { # randomly generate A matrix until at least r+1 units are treated, for feasibility of gyc
@@ -60,8 +59,8 @@ for (case in 1:ncases) {
         N_treated = sum(colSums(A) > 0)
         if (N-N_treated >= r+1) break
     }
-    cat("Treated units proportion: ", N_treated / N, "\n", sep = "")
-    
+    cat("# of treated units", N_treated, "\n", sep = "")
+
     # simulate data in parallel
     onecase <- foreach(i = 1:sims,
                        .combine = 'c',
@@ -70,7 +69,7 @@ for (case in 1:ncases) {
                        .packages = c("MASS")
     ) %dopar% {
         # generate a random sample: 
-        panel <- simulate_data_fm(N = N, T0 = T0, S = S, p = p, r = r, AR1 = AR1,
+        panel <- simulate_data_fm(N = N, T = T, S = S, p = p, r = r, AR1 = AR1,
                           D.sd = 0, te = NULL,
                           A = A,
                           mu = 5,
@@ -112,6 +111,8 @@ if (interactive()) {
   cat("First 5 rows of first simulated panel (first case, first sim):\n")
   print(print(head(sim_data[[1]][[1]], 2)))
 }
+a = sim_data[[1]] # list of sims
+a = sim_data[[1]][[1]] # dataframe of one sim
 
 # save simulated data
 save(sim_data,file="data/sim_data.RData")

@@ -76,10 +76,12 @@ for f = 1:numel(case_names)
     
     %%STORE RESULTS IN STRUCT
     ATT_event_struct.(case_name) = ATT_event;
+
+    %%Intermidiate save after each case for safety
+    % save('sim_result_SSC.mat', 'ATT_struct', 'ATT_event_struct')
 end
 disp('Finished')
-%%
-save('sim_result_SSC.mat', 'ATT_struct', 'ATT_event_struct')
+
 
 %% SUMMARY
 %%extract results
@@ -105,7 +107,8 @@ summary = cell2table(summary, 'VariableNames', ...
 if ~exist('output', 'dir')
     mkdir('output')
 end
-writetable(summary, 'output/sim_summary_SSC.csv');
+file_name = ['output/summary_ssc_' , case_name, '.csv'];
+writetable(summary, file_name);
 
 
 
