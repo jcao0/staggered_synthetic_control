@@ -1,4 +1,6 @@
-
+%% SET ENVIRONMENT
+tmp = matlab.desktop.editor.getActive;
+cd(fileparts(tmp.Filename));
 clear
 tic 
 rng(7)
@@ -12,12 +14,14 @@ alpha_sig = .05;
 %% LOAD DATA
 data = load('sim_data.mat');
 
-%% PREPARATION
-case_names = fieldnames(data);
-ATT_struct = struct();
-ATT_event_struct = struct();
 
 %% START SIMULATION
+
+%%preparation
+case_names = fieldnames(data);
+ATT_event_struct = struct();
+
+%%estimation
 for f = 1:numel(case_names)
 
     case_name = case_names{f};
@@ -33,9 +37,9 @@ for f = 1:numel(case_names)
         t0 = tic
 
         % Print progress every 200 simulations
-        if mod(i,200) == 0
-            disp(['  Simulation ', num2str(num_sims-i), '/', num2str(num_sims), ' completed...']);
-        end
+%         if mod(i,200) == 0
+%             disp(['  Simulation ', num2str(num_sims-i), '/', num2str(num_sims), ' completed...']);
+%         end
 
         %%Extract simulation i
         data_i = data_case(:,:,i);
@@ -59,6 +63,9 @@ for f = 1:numel(case_names)
         
         %%ESTIMATION         
         output_t = att_event_ci(Y,D,S,alpha_sig);
+        elapsed_time(i,1) = toc(t0);
+
+        %%ATT
         att_hat_t = output_t.att_hat;
         
         %%CONFIDENCE INTERVALS
@@ -66,10 +73,9 @@ for f = 1:numel(case_names)
         ci_u_t = att_hat_t - output_t.lb;
         
         %%COLLECT RESULTS
-        ATT_event{i} = [(1:S)', att_hat_t - eff(1:S), att_hat_t, (att_hat_t-eff(1:S)).^2, (ci_l_t<=eff(1:S)) & (ci_u_t>=eff(1:S))];
+        ATT_event{i} = att_hat_t;
         
-        %%USED TIME PER SIM
-        elapsed_time(i,1) = toc(t0);  
+        %%USED TIME PER SIM  
         fprintf('Sim %d | elapsed %.2f sec\n', ...
             i,  elapsed_time(i,1));
     end
@@ -83,32 +89,38 @@ end
 disp('Finished')
 
 
-%% SUMMARY
-%%extract results
-sim_mat = fieldnames(ATT_event_struct);
-sim_mat = sim_mat{1};
-sim_mat = ATT_event_struct.(sim_mat)(cellfun(@(x) size(x,1) == 10, ATT_event_struct.(sim_mat)));
-sim_mat = cat(3, sim_mat{:});
+%% EXTRACT RESULT AND SAVE
 
-%%summary
-ATT = squeeze(sim_mat(:, 3, :));
-ATT_Var = var(ATT, 0, 2); 
-
-
-elapsed_time = repmat(sum(elapsed_time), length(ATT_Var), 1);
-
-summary = mean(sim_mat, 3);
-summary(:,3) = ATT_Var;    
-summary = [summary, elapsed_time];
-summary = num2cell(summary);
-summary = cell2table(summary, 'VariableNames', ...
-    {'event_time','bias','var', 'mse','coverage_rate', 'time_total(s)'});
-%% SAVE
+%%create folder or delete previous results
 if ~exist('output', 'dir')
     mkdir('output')
+else
+    delete(fullfile('output','*ssc*'))
 end
-file_name = ['output/summary_ssc_' , case_name, '.csv'];
-writetable(summary, file_name);
+
+
+%%extract and save
+%%one csv file for each case, one simulation per row, event time ATT per column
+for f = 1:numel(case_names)
+    case_name = case_names{f};
+%     dir_case = fullfile('output', case_name);
+%     if ~exist(dir_case, 'dir')
+%         mkdir('output/case_name');
+%     end
+    %%extract results
+    sim_result = ATT_event_struct.(case_name); 
+    sim_result = cat(2, sim_result{:}).';
+    varNames = strcat("event_time_", string(1: width(sim_result)));
+    sim_result = [sim_result, elapsed_time];
+    varNames = [varNames, "time_sec"];
+    sim_result = array2table(sim_result, 'VariableNames', varNames);
+
+    %%save
+    file_name = ['output/sim_results_', case_name, '_ssc.csv'];
+    writetable(sim_result, file_name);
+    fprintf('Case %s | saved in %s\n', case_name, file_name);
+end
+
 
 
 

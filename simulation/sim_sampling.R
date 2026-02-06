@@ -2,13 +2,16 @@
 ## Replication Materials
 
 # This scripts generate simulated samples for different cases
-# One case is defined by a combination of N (number of units) and T (number of pre-treatment periods)
+# One case is defined by a combination of: 
+#   - N (number of units) 
+#   - T (number of pre-treatment periods)
+#   - r (number of latent factors)
 
 # %% set environment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 rm(list=ls(all=TRUE))
 
 set.seed(123)
-setwd("/Users/wuhang/Desktop/metric/sc/replication_files/simulation")
+setwd("/Users/wuhang/Desktop/metric/sc/submission/replication_files/simulation")
 library(R.matlab)
 library(doParallel)
 library(foreach)
@@ -16,24 +19,42 @@ library(MASS)
 source("functions/sampling.R")
 
 # %% pre-set parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-sims<-100 # number of simulations per case
 
-# define cases
-TT <- c(50) # vector of target pre-treatment periods
-NN  <- c(20) # vector of target units
-S <- 10 # number of post-treatment periods
-cases <- expand.grid(TT = TT, NN = NN) # Create all combinations of TT and NN
-ncases <- nrow(cases)
+# Define cases  
+NN  <- c(33) # vector of target unit numbers 
+TT <- c(15,42,157) # vector of target pre-treatment periods numbers
+RR <- c(3,6,7) # vector of target latent factors numbers
 
-# parameters for DGP
-r <- 2 # number of latent factors
+# number of simulations per case
+sims<-100
+
+## other parameters for DGP
+S <- 7 # number of post-treatment periods
 FE <- TRUE # include fixed effects
 p <- 0 # number of observed covariates
 AR1 <- 0.5 # AR(1) coefficient for latent factors and time fixed effects
 
 
-
 # %% Generate simulated data %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+# Create all combinations of cases
+cases <- expand.grid(TT = TT, NN = NN, RR = RR) # Create all combinations of TT, N, and r
+ncases <- nrow(cases)
+
+# Generate treatment matrix for each N-S combination
+list_A = list()
+for(N in NN) {
+    repeat { # randomly generate A matrix until at least r units are treated for feasibility of gyc, and longest treatment time is S and shortest treatment time is at least 2 for results comparability
+        A = generate_treatment_matrix(N=N, S=S)
+        S_treat = colSums(A) # treatment times for each unit
+        S_first = max(S_treat[which(colSums(A) > 0)]) # treatment periods of first treated unit
+        S_last = min(S_treat[which(colSums(A) > 0)]) # treatment periods of last treated unit
+        N_treated = sum(colSums(A) > 0)
+        if (N-N_treated >= min(RR) & S_first == S & S_last >= 2) break
+    }
+    list_A[[as.character(N)]] = A
+}
+
 
 # register multiple cores
 cores<-8
@@ -48,18 +69,21 @@ sim_data_mat <- list()  # for MATLAB-compatible structure
 for (case in 1:ncases) {
     N <- cases$NN[case]
     T <- cases$TT[case]
-    case_name <- paste0("N", N, "_T", T)
-
-    cat("Simulate: sims = ", sims,
-        ", N = ", N, ", T = ", T, ", S = ", S, "\n", sep = "")
+    r <- cases$RR[case]
     
-    # generate treatment matrix
-    repeat { # randomly generate A matrix until at least r+1 units are treated, for feasibility of gyc
-        A = get_treatment_matrix(N=N, S=S, r=2)
-        N_treated = sum(colSums(A) > 0)
-        if (N-N_treated >= r+1) break
-    }
-    cat("# of treated units", N_treated, "\n", sep = "")
+    A = list_A[[as.character(N)]]
+
+
+    te <- c(1:S)
+    if( S >=7 ) te[7:length(te)] = 7 # cap long-time treatment effect time at 7
+
+
+    N_treated = sum(colSums(A) > 0)
+    case_name <- paste0("N", N, "_T", T, "_r", r)
+
+    cat("Case", case, ": sims = ", sims,
+        ", N = ", N, ", T = ", T, ", r = ", r, "\n", sep = "")
+    cat("# of treated units: ", N_treated, "\n", sep = "")
 
     # simulate data in parallel
     onecase <- foreach(i = 1:sims,
@@ -70,7 +94,7 @@ for (case in 1:ncases) {
     ) %dopar% {
         # generate a random sample: 
         panel <- simulate_data_fm(N = N, T = T, S = S, p = p, r = r, AR1 = AR1,
-                          D.sd = 0, te = NULL,
+                          D.sd = 0, te = te,
                           A = A,
                           mu = 5,
                           FE = FE)
@@ -95,7 +119,7 @@ for (case in 1:ncases) {
     sim_data_mat[[case_name]] <- onecase_array
 
     # Save RData intermediate
-    save(sim_data, file = "sim_data.RData") # store intermediate results to avoid loss by crashes 
+    # save(sim_data, file = "sim_data.RData") # store intermediate results to avoid loss by crashes 
 }
 stopCluster(cl) # stop parallel computing
 
@@ -111,8 +135,6 @@ if (interactive()) {
   cat("First 5 rows of first simulated panel (first case, first sim):\n")
   print(print(head(sim_data[[1]][[1]], 2)))
 }
-a = sim_data[[1]] # list of sims
-a = sim_data[[1]][[1]] # dataframe of one sim
 
 # save simulated data
 save(sim_data,file="data/sim_data.RData")

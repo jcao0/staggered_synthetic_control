@@ -9,17 +9,18 @@
 
 
 # function to get logistic parameters for treatment assignment--------
-get_logistic_theta <- function(r_treat, r_treat_period, seed=NULL) {
+get_logistic_theta <- function(r_treat, r_treat_period, S, seed=NULL) {
   #' Estimate logistic model parameters for treatment assignment
   #'
   #' This function estimates the parameters of a logistic model for treatment assignment,
   #' given the desired proportion of treated units and the proportion treated per period.
   #'
-  #' @param r_treat Numeric. Desired proportion of units eventually treated.
+  #' @param r_treat Numeric. Desired proportion of units eventually treated in target post-treatment periods.
   #' @param r_treat_period Numeric. Desired proportion of treated units per period.
+  #' @param S Numeric. Number of post-treatment periods.
   #' @return Numeric vector of estimated logistic parameters (theta).
   #' @examples
-  #' theta <- get_logistic_theta(0.5, 0.1)
+  #' theta <- get_logistic_theta(0.5, 0.1, 7)
     if (!is.null(seed)) {
         set.seed(seed)
     }
@@ -34,7 +35,7 @@ get_logistic_theta <- function(r_treat, r_treat_period, seed=NULL) {
     b <- theta[2]
     pZ <- plogis(a + b * Z)
     c(
-      mean((1 - pZ)^10) - (1 - mu_grand),
+      mean((1 - pZ)^S) - (1 - mu_grand),
       mean(pZ) - mu
     )
   }
@@ -49,17 +50,17 @@ get_logistic_theta <- function(r_treat, r_treat_period, seed=NULL) {
 }
 
 # function to generate treatment matrix A --------
-get_treatment_matrix <- function(N, S, theta=c(-0.0026, 1.037), r=0, seed=NULL) {
+generate_treatment_matrix <- function(N, S, r=2, theta=c(-0.8700, 0.1991), seed=NULL) {
     #' Generate treatment assignment matrix based on logistic model parameters
     #'
     #' @param N Numeric. Number of units.
     #' @param S Numeric. Number of post-treatment periods.
-    #' @param theta Numeric vector. Logistic model parameters for treatment assignment. Default corresponds to approx. 90% units eventually treated and 50% treated per period.
-    #' @param r Numeric. Number of latent factors influencing treatment assignment.
+    #' @param theta Numeric vector. Logistic model parameters for treatment assignment. Default corresponds to approx. 90% units eventually treated and 30% treated per period.
+    #' @param r Numeric. Number of latent factors influencing treatment assignment. Default is 2, corresponding to the parameter r in obtaining theta from get_logistic_theta.
     #' @param seed Numeric. Random seed for reproducibility.
     #' @return Treatment assignment matrix A of dimension (S x N).
     #' @examples
-    #' A <- get_treatment_matrix(N=20, S=10, theta=c(-1.7,-0.6), r=2)
+    #' A <- generate_treatment_matrix(N=20, S=10, theta=c(-1.7,-0.6), r=2)
     
     if (!is.null(seed)) {
         set.seed(seed)
@@ -254,5 +255,6 @@ simulate_data_fm <- function(N, T, S, te=NULL, D.sd=0, A=NULL, theta = c(-1.7,-0
 
 # example usage:
 # theta <- get_logistic_theta(r_treat = 0.8, r_treat_period = 0.5)
-# A <- get_treatment_matrix(N=20, S=10, theta=c(0.0368, 1.725), r=2)
+# A <- generate_treatment_matrix(N=20, S=10, theta=c(0.0368, 1.725), r=2)
+# treatment_matrix <- get_treatment_matrix(data = data, col_unit = "idunico", col_time = "Year", col_treatment = "policial",  col_outcome = "presence_strength")
 # sim_data <- simulate_data_fm(N=20, T=5, S=10, p=0, r=2, AR1=0.5, D.sd=0, A=A)
