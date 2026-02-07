@@ -69,7 +69,8 @@ plot_rmse_case <- function(plot_data, case_name, save_file = NULL) {
 # Function to combine multiple plots into a single figure
 combine_plots <- function(plot_list,
                           panel_titles = NULL,
-                          shared_legend = FALSE) {
+                          shared_legend = FALSE,
+                          save_file = NULL) {
   
   n <- length(plot_list)
   parameter_panel_titles <- panel_titles
@@ -133,5 +134,11 @@ combine_plots <- function(plot_list,
       plot.margin = margin(5.5, 5.5, 15, 5.5),
     )
   
+  # ---- Save plot if file path is provided ----
+    if (!is.null(save_file)) {
+        # ggsave(filename = save_file, plot = combined, width = 10, height = 10, dpi = 100)
+        ggsave(filename = save_file, plot = combined, width = 12, height = 8, dpi = 100)
+    }
+
   return(combined)
 }

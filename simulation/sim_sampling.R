@@ -9,12 +9,14 @@
 
 # %% set environment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 rm(list=ls(all=TRUE))
-
 set.seed(123)
-setwd("/Users/wuhang/Desktop/metric/sc/submission/replication_files/simulation")
+# setwd("/Users/wuhang/Desktop/metric/sc/submission/replication_files/simulation")
+
+# install.packages(c("R.matlab", "doParallel", "foreach", "doRNG","MASS"))
 library(R.matlab)
 library(doParallel)
 library(foreach)
+library(doRNG)
 library(MASS)
 source("functions/sampling.R")
 
@@ -23,10 +25,10 @@ source("functions/sampling.R")
 # Define cases  
 NN  <- c(33) # vector of target unit numbers 
 TT <- c(15,42,157) # vector of target pre-treatment periods numbers
-RR <- c(3,6,7) # vector of target latent factors numbers
+RR <- c(3,6) # vector of target latent factors numbers
 
 # number of simulations per case
-sims<-100
+sims<-1000
 
 ## other parameters for DGP
 S <- 7 # number of post-treatment periods
@@ -90,8 +92,9 @@ for (case in 1:ncases) {
                        .combine = 'c',
                        .multicombine = TRUE,
                        .inorder = FALSE,
-                       .packages = c("MASS")
-    ) %dopar% {
+                       .packages = c("MASS"),
+                       .options.RNG = 123 # set seed
+    ) %dorng% {
         # generate a random sample: 
         panel <- simulate_data_fm(N = N, T = T, S = S, p = p, r = r, AR1 = AR1,
                           D.sd = 0, te = te,

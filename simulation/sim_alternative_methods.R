@@ -12,13 +12,15 @@
 # %% set environment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 rm(list=ls(all=TRUE))
 set.seed(123)
-setwd("/Users/wuhang/Desktop/metric/sc/submission/replication_files/simulation")
+#setwd("/Users/wuhang/Desktop/metric/sc/submission/replication_files/simulation")
 
-
+# install.packages(c("dplyr", "doParallel", "parallel", "foreach", "doRNG", "gsynth","devtools","did"))
+# devtools::install_github("ebenmichael/augsynth")
 library(dplyr)
 library(doParallel)
 library(parallel)
 library(foreach)
+library(doRNG)
 library(gsynth)
 library(augsynth)
 library(did)
@@ -98,8 +100,8 @@ for (case in 1:ncases) {
     
 
     # start simulations for one case
-    onecase<-foreach (i=1:nsims,.combine='list', .multicombine=TRUE,.inorder=FALSE,
-                      .packages=c("gsynth", "augsynth", "did","dplyr"), .verbose = FALSE) %dopar% { # parallel computing
+    onecase<-foreach (i=1:nsims,.combine='c', .multicombine=TRUE,.inorder=FALSE,
+                      .packages=c("gsynth", "augsynth", "did","dplyr"), .verbose = FALSE,.options.RNG = 123) %dorng% { # parallel computing
         
         ## annouce simulations
         if (i %% 200 == 0) {
@@ -145,14 +147,18 @@ for (case in 1:ncases) {
 
         ## ASY: do not calculate ATT, as they only calulate att_e for the shortest treated periods across all treated units.
         if(asy==TRUE){
+
         t0_asy <- Sys.time()   
         
         ppool_syn <- multisynth(Y ~ D, unit = id, time = time,
                         panel)            
         t1_asy <- Sys.time()
         time_asy <- as.numeric(difftime(t1_asy, t0_asy, units = "secs"))
+
+        if(exists("asy_SE")) {
+          att_e.asy = summary(ppool_syn)
+        } else {att_e.asy = summary(ppool_syn, inf_type = '')}
         
-        att_e.asy = summary(ppool_syn)
         att_e.asy <- as.data.frame(att_e.asy$att)
         att_e.asy = att_e.asy[att_e.asy$Level =='Average' & is.na(att_e.asy$Time) ==FALSE & att_e.asy$Time>=0, ] # only post-treatment periods for shortest treated periods
         cols <- c('Estimate')
@@ -195,7 +201,7 @@ for (case in 1:ncases) {
           time_did <- NULL
         }
 
-        out = list(
+        out = list(list(
           gsc_att_e = att_e.gsc,     # matrix
           gsc_time  = time_gsc,
 
@@ -204,7 +210,7 @@ for (case in 1:ncases) {
 
           did_att_e = att_e.did,     # matrix
           did_time  = time_did
-        )
+        ))
         return(out)      
   }
   # collect results and store in arrays : dim =  event-time; sims
@@ -280,7 +286,7 @@ for (case in 1:ncases) {
 stopCluster(cl) # stop parallel computing
 cat("\nEstimation completed.")
 cat("\nRun time: ");print(Sys.time()-begin.time)
-cat("\nRun the code block following to save results\n")
+
 
 
 # %% Save %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -317,7 +323,3 @@ for (case in 1:ncases) {
 }
 
 cat("\nSimulation results of alternative methods saved in 'output' folder.\n")
-
-
-
-

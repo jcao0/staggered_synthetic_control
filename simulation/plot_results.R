@@ -11,8 +11,9 @@
 # %% Set environment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 rm(list=ls(all=TRUE))
 
-setwd("/Users/wuhang/Desktop/metric/sc/submission/replication_files/simulation")
+#setwd("/Users/wuhang/Desktop/metric/sc/submission/replication_files/simulation")
 
+# install.packages(c("ggplot2", "patchwork"))
 library(ggplot2)
 library(patchwork)
 source('functions/plot.R') # load plotting functions
@@ -77,12 +78,15 @@ plot_list <- lapply(case_names, function(cname) {
   plot_rmse_case(plot_data, cname) # plot function from plot.R
 })
 names(plot_list) <- case_names
-combined = combine_plots(plot_list)  # plot combining function from plot.R
+
+save_file = 'output/Figure_simulation_results.png'
+combined = combine_plots(plot_list, save_file = save_file)  # plot combining function from plot.R
+cat("\nSimulation figures saved in 'output' folder.\n")
 print(combined)
 
 
 # print elapsed time for simulation
-cat("Elapsed time of each method:\n")
+cat("\nElapsed time of each method:\n")
 for (case in case_names) {
   cat("Case:", case, "\n")
   for (method in methods) {

@@ -2,11 +2,9 @@
 tmp = matlab.desktop.editor.getActive;
 cd(fileparts(tmp.Filename));
 clear
-tic 
 rng(7)
 restoredefaultpath
 addpath('functions','data');
-alpha_sig = .05;
 % warning('off','all')
 
 
@@ -16,6 +14,7 @@ data = load('sim_data.mat');
 
 
 %% START SIMULATION
+t0 = tic;
 
 %%preparation
 case_names = fieldnames(data);
@@ -34,7 +33,7 @@ for f = 1:numel(case_names)
     
     %%PARALLEL LOOP OVER SIMULATIONS
     parfor i = 1:num_sims
-        t0 = tic
+        t0_i = tic
 
         % Print progress every 200 simulations
 %         if mod(i,200) == 0
@@ -62,15 +61,12 @@ for f = 1:numel(case_names)
         D_S = D(:,T+1:T+S);
         
         %%ESTIMATION         
-        output_t = att_event_ci(Y,D,S,alpha_sig);
-        elapsed_time(i,1) = toc(t0);
+        output_t = att_event(Y,D,S);
+        elapsed_time(i,1) = toc(t0_i);
 
         %%ATT
         att_hat_t = output_t.att_hat;
         
-        %%CONFIDENCE INTERVALS
-        ci_l_t = att_hat_t - output_t.ub;
-        ci_u_t = att_hat_t - output_t.lb;
         
         %%COLLECT RESULTS
         ATT_event{i} = att_hat_t;
@@ -87,6 +83,7 @@ for f = 1:numel(case_names)
     % save('sim_result_SSC.mat', 'ATT_struct', 'ATT_event_struct')
 end
 disp('Finished')
+toc(t0)
 
 
 %% EXTRACT RESULT AND SAVE
