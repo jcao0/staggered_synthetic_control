@@ -1,14 +1,30 @@
+## Empirical Study
+## Replication Materials
+
+# This script generates the treatment status plots for different outcome groups
+# Outcomes group includes : homicide, theft and cartel activity
+# Main steps include:
+# 1. Generate treatment status plots for each outcome group
+# 2. Combine the individual plots into a single figure
+
 ## %% Set environment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 rm(list=ls(all=TRUE))
+
+# set working directory to the folder where this script is located
+setwd("/Users/replication_files/Intergovernmental coordination and criminality/treatment_scheme")
+
+# packages
+# install.packages(c("panelView", "ggplot2", "cowplot", "dplyr"))
 library(panelView)
 library(ggplot2)
 library(cowplot)
 library(dplyr)
 
-## %% Plot %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+## %% Plot for each outcome %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Note: different time periods available for different outcomes
 
 #Treated status: homicide
-psrm_crime_data <- read.csv("data/processed/psrm_crime_data.csv")
+psrm_crime_data <- read.csv("cleaned_data/psrm_crime_data.csv")
 psrm_crime_data <- psrm_crime_data[(psrm_crime_data$Year<2021),]
 psrm_crime_data$time <- psrm_crime_data$time - min(psrm_crime_data$time) + 1
 p_1 = panelview(hom_all_rate ~ Policial, data = psrm_crime_data, 
@@ -20,7 +36,7 @@ cat("\n Outcomes: homicide | The ratio of time periods to units is:", n_times/n_
 
 
 #Treated status: theft
-psrm_crime_data <- read.csv("data/processed/psrm_crime_data.csv")
+psrm_crime_data <- read.csv("cleaned_data/psrm_crime_data.csv")
 psrm_crime_data <- psrm_crime_data[(psrm_crime_data$Year>2010),]
 psrm_crime_data$time <- psrm_crime_data$time - min(psrm_crime_data$time) + 1
 p_2 = panelview(theft_violent_rate ~ Policial, data = psrm_crime_data, 
@@ -32,7 +48,7 @@ cat("\n Outcomes: theft | The ratio of time periods to units is:", n_times/n_uni
 
 
 #Treated status: cartel
-psrm_cartel_data <- read.csv("data/processed/psrm_cartel_data.csv")
+psrm_cartel_data <- read.csv("cleaned_data/psrm_cartel_data.csv")
 psrm_cartel_data$Year <- psrm_cartel_data$Year - min(psrm_cartel_data$Year) + 1
 p_3 = panelview(presence_strength ~ policial, data = psrm_cartel_data, 
           index = c("idunico","Year"), 
@@ -45,18 +61,18 @@ cat("\n Outcomes: cartel | The ratio of time periods to units is:", n_times/n_un
 
 ## %% Combine plots and save %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 plots <- list(p_1, p_2, p_3)
+
+# Individual plots settings
 captions <- c("(a) Homicide and cartel-related homicide rate",
               "(b) Violent and nonviolent theft rate",
               "(c) Cartel strength, number and war")
-
-
+# set individual plot widths based on the range of the x-axis (time)
 x_ranges <- sapply(plots, function(p) {
   diff(range(p$data$period, na.rm = TRUE))
 })
 scaled_widths <- sqrt(x_ranges / max(x_ranges))
 scaled_widths <- scaled_widths[2:3]/sum(scaled_widths[2:3]) * 0.95 # scale to fit within 95% of the width for the second row
-
-# Rescale individual plots with your theme + captions
+# rescale individual plots to fit the combined layout
 plots_rescaled <- Map(function(p, cap) {
   p <- p + 
     theme(
@@ -80,16 +96,20 @@ plots_rescaled <- Map(function(p, cap) {
     theme(plot.margin = margin(t = 40, r = 25, b = 40, l = 25)) # margin around the subplot to accommodate caption
 }, plots, captions)
 
+
+# Combine plots
 # First row: p1 (full width)
 row1 <- ggdraw() + draw_plot(plots_rescaled[[1]], width = 1, x = 0)
-
 # Second row: p2 + p3 side by side, but full width combined
 row2 <- ggdraw() +
   draw_plot(plots_rescaled[[2]], x = 0, width = scaled_widths[1]) +
   draw_plot(plots_rescaled[[3]], x = 0.95 - scaled_widths[2], width = scaled_widths[2])
-
 # Combine vertically
 combined <- plot_grid(row1, row2, ncol = 1, rel_heights = c(1, 1))
 
-ggsave("results/Figure2_treatment_status.png", width = 15, height = 10, dpi = 300,  bg = "white")
+# Save the combined plot
+if (!dir.exists("output")) {
+  dir.create("output")
+}
+ggsave("output/Figure2_treatment_scheme.png", width = 15, height = 10, dpi = 300,  bg = "white")
 

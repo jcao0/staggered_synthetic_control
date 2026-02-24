@@ -18,10 +18,10 @@ plot_rmse_case <- function(plot_data, case_name, save_file = NULL) {
     
     # ---- Colors, line types, shapes ----
     method_colors    <- c("ssc" = rgb(1,0.4,0.3), 
-                            "gsc" = rgb(0.55,0.45,0.75), 
-                            "asy" = rgb(0,0.6,0.6))
-    method_linetypes <- c("ssc" = "solid", "gsc" = "dashed", "asy" = "dotdash")
-    method_shapes    <- c("ssc" = 16, "gsc" = 17, "asy" = 15)
+                            "ppsc" = rgb(0.55,0.45,0.75), 
+                            "gsc" = rgb(0,0.6,0.6))
+    method_linetypes <- c("ssc" = "solid", "ppsc" = "dashed", "gsc" = "dotdash")
+    method_shapes    <- c("ssc" = 16, "ppsc" = 17, "gsc" = 15)
     
     # Capitalized legend labels
     method_labels <- toupper(levels(df$method))
@@ -30,9 +30,9 @@ plot_rmse_case <- function(plot_data, case_name, save_file = NULL) {
         df,
         aes(x = event_time, y = rmse, color = method, linetype = method, shape = method)
     ) +
-        geom_hline(yintercept = 0, linetype = "longdash", linewidth = 0.6, color = "gray40") +
+        # geom_hline(yintercept = 0, linetype = "longdash", linewidth = 0.6, color = "gray40") +
         geom_line(na.rm = TRUE, linewidth = 1) +
-        geom_point(na.rm = TRUE, size = 3) +
+        geom_point(na.rm = TRUE, size = 4) +
         scale_color_manual(values = method_colors, labels = method_labels) +
         scale_linetype_manual(values = method_linetypes, labels = method_labels) +
         scale_shape_manual(values = method_shapes, labels = method_labels) +
@@ -41,26 +41,30 @@ plot_rmse_case <- function(plot_data, case_name, save_file = NULL) {
         ) +
         labs(
         # title = paste("T =", T, ", N =", N, ", r =", r),
-        x = "Event Time",
-        y = "Root Mean Squared Error (RMSE)",
+        x = "event time",
+        y = "RMSE",
         color = NULL,
         linetype = NULL,
         shape = NULL
         ) +
         theme_bw() +
         theme(
+        axis.title = element_text(size = 20),
+        axis.text = element_text(size = 20),
         panel.background = element_rect(fill = "white", color = NA),
+        panel.grid = element_blank(), 
         plot.background  = element_rect(fill = "white", color = NA),
-        legend.position = c(0.98, 0.02),
-        legend.justification = c("right", "bottom"),
-        legend.background = element_rect(fill = NA, color = NA),
-        legend.key.width = unit(1.5, "cm"), # wider legend keys
-        legend.key.height = unit(0.5, "cm")
+        legend.position = c(0.02, 0.98),
+        legend.justification = c("left", "top"),
+        legend.background = element_rect(fill = NA, color = "black",linewidth = 0.2),
+        legend.key.width = unit(1.8, "cm"), # wider legend keys
+        legend.key.height = unit(0.6, "cm"),
+        legend.text = element_text(size = 16)
         )
     
     # Save plot if file path is provided
     if (!is.null(save_file)) {
-        ggsave(filename = save_file, plot = p, width = 10, height = 10, dpi = 100)
+        ggsave(filename = save_file, plot = p, width = 10, height = 10, dpi = 300)
     }
     
     return(p)
@@ -84,12 +88,12 @@ combine_plots <- function(plot_list,
                 N <- as.numeric(sub("N([0-9]+)_.*", "\\1", case_name))
                 r <- as.numeric(sub(".*_r([0-9]+)", "\\1", case_name))    
    })
-   panel_titles <- sapply(seq_len(n), function(i) {
-    paste0( "(" , letters[i], ") ",
-            "T = ", as.numeric(sub(".*T([0-9]+).*", "\\1", names(plot_list)[i])), 
-            ", N = ", as.numeric(sub("N([0-9]+)_.*", "\\1", names(plot_list)[i])),
-            ", r = ", as.numeric(sub(".*_r([0-9]+)", "\\1", names(plot_list)[i])))
-   })
+     panel_titles <- sapply(seq_len(n), function(i) {
+      paste0( "(" , letters[i], ") ",
+        "r = ", as.numeric(sub(".*_r([0-9]+)", "\\1", names(plot_list)[i])),
+        ", N = ", as.numeric(sub("N([0-9]+)_.*", "\\1", names(plot_list)[i])),
+        ", T = ", as.numeric(sub(".*T([0-9]+).*", "\\1", names(plot_list)[i])) )
+     })
   }
 
   # --- Align y-axes ----
@@ -128,16 +132,16 @@ combine_plots <- function(plot_list,
     theme(
       plot.caption = element_text(
         hjust = 0.5,
-        vjust = -1,
-        size  = 12
+        vjust = -2,
+        size  = 24
       ),
-      plot.margin = margin(5.5, 5.5, 15, 5.5),
+      plot.margin = margin(30, 10, 20, 10), # top, right, bottom, left
     )
   
   # ---- Save plot if file path is provided ----
     if (!is.null(save_file)) {
         # ggsave(filename = save_file, plot = combined, width = 10, height = 10, dpi = 100)
-        ggsave(filename = save_file, plot = combined, width = 12, height = 8, dpi = 100)
+        ggsave(filename = save_file, plot = combined, width = 15, height = 11, dpi = 300)
     }
 
   return(combined)

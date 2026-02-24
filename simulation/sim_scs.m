@@ -24,7 +24,7 @@ ATT_event_struct = struct();
 for f = 1:numel(case_names)
 
     case_name = case_names{f};
-    data_case = data.(case_name);   % each data_case contains one N-T combination
+    data_case = data.(case_name);   % each data_case contains one N-T-r combination
     num_sims = size(data_case, 3);     % # of simulation
     fprintf('Processing case: %s, nsims = %d\n', case_name, num_sims);
 
@@ -35,10 +35,6 @@ for f = 1:numel(case_names)
     parfor i = 1:num_sims
         t0_i = tic
 
-        % Print progress every 200 simulations
-%         if mod(i,200) == 0
-%             disp(['  Simulation ', num2str(num_sims-i), '/', num2str(num_sims), ' completed...']);
-%         end
 
         %%Extract simulation i
         data_i = data_case(:,:,i);
@@ -51,7 +47,7 @@ for f = 1:numel(case_names)
         Y = reshape(data_i(:,3),T1,N)'; 
         D = reshape(data_i(:,4),T1,N)'; 
         
-        %%DEFINE TREATMENT PERIODS
+        %%DEFINE TREATMENT MATRIX
         T = find(sum(D,1),1)-1;
         S_max = T1-T;
         S = S_max;
@@ -63,12 +59,10 @@ for f = 1:numel(case_names)
         %%ESTIMATION         
         output_t = att_event(Y,D,S);
         elapsed_time(i,1) = toc(t0_i);
-
-        %%ATT
-        att_hat_t = output_t.att_hat;
         
         
         %%COLLECT RESULTS
+        att_hat_t = output_t.att_hat;
         ATT_event{i} = att_hat_t;
         
         %%USED TIME PER SIM  
@@ -88,7 +82,7 @@ toc(t0)
 
 %% EXTRACT RESULT AND SAVE
 
-%%create folder or delete previous results
+%%create folder or delete existing results
 if ~exist('output', 'dir')
     mkdir('output')
 else
@@ -100,10 +94,7 @@ end
 %%one csv file for each case, one simulation per row, event time ATT per column
 for f = 1:numel(case_names)
     case_name = case_names{f};
-%     dir_case = fullfile('output', case_name);
-%     if ~exist(dir_case, 'dir')
-%         mkdir('output/case_name');
-%     end
+
     %%extract results
     sim_result = ATT_event_struct.(case_name); 
     sim_result = cat(2, sim_result{:}).';

@@ -4,12 +4,13 @@
 % The Figure compare results estimated by staggered synthetic control and
 % general synthetic control (Xu, 2017)
 
-
+tmp = matlab.desktop.editor.getActive;
+cd(fileparts(tmp.Filename));
 clear
 tic 
 rng(7)
 restoredefaultpath
-addpath('results');
+addpath('output');
 alpha_sig = .05;
 
 
@@ -41,10 +42,10 @@ for i =1:length(outcomes)
 
     subplot(nRows, nCols, i)     % 3 rows, 2 columns, k-th plot
     hold on
-    plot([.5,S_need+.5],[0,0],'--k');
+    plot([-.5,S_need-.5],[0,0],'--k');
 
 
-    x = 1:S_need;
+    x = 0:S_need-1; % set event-time to start from zero
     fill([x fliplr(x)], ...
         [gamma_hat_ssc-ub_ssc; flipud(gamma_hat_ssc-lb_ssc)], ...
         [1,0.4,0.3], 'FaceAlpha', 0.1, 'EdgeColor','none');
@@ -52,8 +53,8 @@ for i =1:length(outcomes)
     fill([x fliplr(x)], [gamma_hat_gsc-ub_gsc; flipud(gamma_hat_gsc-lb_gsc)], ...
         [0,0.6,0.6], 'FaceAlpha', 0.1, 'EdgeColor','none');
 
-    p3 = plot(1:S_need,gamma_hat_ssc,'Color',[1,0.4,0.3],'LineWidth',2);
-    p4 = plot(1:S_need,gamma_hat_gsc,'--','Color',[0,.6,.6],'LineWidth',2);
+    p3 = plot(x,gamma_hat_ssc,'Color',[1,0.4,0.3],'LineWidth',2);
+    p4 = plot(x,gamma_hat_gsc,'--','Color',[0,.6,.6],'LineWidth',2);
 
     % title and label
     title = replace(titles{i}, "_", " ");
@@ -68,7 +69,7 @@ for i =1:length(outcomes)
            'LineStyle','none', 'FontSize',14)
     xlabel('event time','FontSize',12)
     ylabel('ATT estimates','FontSize',12)
-    xlim([.5 S_need+.5])
+    xlim([-.5 S_need-.5])
     legend([p3 p4],{'SSC','GSC'},'Location',...
         'northwest','FontSize',10);
     
@@ -80,6 +81,8 @@ for i =1:length(outcomes)
 end
 
 %% save figure
-
-print(f, 'results/Figure3_comparison_of_SSC_and_GSC.png', '-dpng', '-r300')  % high-resolution PNG
+if ~exist('output', 'dir')
+    mkdir('output')
+end
+print(f, 'output/Figure3_application_results.png', '-dpng', '-r300')  % high-resolution PNG
 

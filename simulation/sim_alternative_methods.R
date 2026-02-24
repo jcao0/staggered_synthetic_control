@@ -5,16 +5,16 @@
 ## This scripts produce simulation results of alternative methods for event-time ATT
 ## Alternative methods include:
 ## 1. Generalized Synthetic Control (gsc) by Xu (2017)
-## 2. Augmented Synthetic Control (asy) by Ben-Michael, Feller, and Rothstein (2021)
-## 3. Difference-in-Differences (did) method by Callaway and Sant'Anna (2021)
+## 2. Partially Pooled Synthetic Control (ppsc) by Ben-Michael, Feller, and Rothstein (2022)
+
+## Note: ppsc is called "asy" in the code, as it is implemented in the R package "augsynth" 
 
 
 # %% set environment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 rm(list=ls(all=TRUE))
 set.seed(123)
-#setwd("/Users/wuhang/Desktop/metric/sc/submission/replication_files/simulation")
 
-# install.packages(c("dplyr", "doParallel", "parallel", "foreach", "doRNG", "gsynth","devtools","did"))
+# install.packages(c("dplyr", "doParallel", "parallel", "foreach", "doRNG", "gsynth","devtools"))
 # devtools::install_github("ebenmichael/augsynth")
 library(dplyr)
 library(doParallel)
@@ -23,7 +23,6 @@ library(foreach)
 library(doRNG)
 library(gsynth)
 library(augsynth)
-library(did)
 source("functions/padding_matrix.R")
 
 # load simulated data
@@ -31,15 +30,15 @@ load("data/sim_data.RData")
 
 # %% pre-set parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-# methods to compare:
+# methods to compare (set TRUE to run the method, FALSE to skip):
 gsc = TRUE  # Generalized Synthetic Control
-asy = TRUE  # Augmented Synthetic Control
-did = FALSE  # Callaway and Sant'Anna (2021) DID method
+asy = TRUE  # Partially Pooled Synthetic Control
+
 
 # set small number for testing cases if needed
 n_test_case = NULL # set NULL to run all cases
 
-# set smallnumber of testing simulations if needed
+# set small number of testing simulations if needed
 n_test_sim <- NULL # set NULL to run all simulations per case
 
 
@@ -47,7 +46,7 @@ n_test_sim <- NULL # set NULL to run all simulations per case
 
 
 # %%Start estimation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# results would be stored in a nested list: method -> case -> att_e array + time array
+# estimation results would be stored in a nested list: method -> case -> att_e array + time array
 # dim of att_e array =  event-time; stats; sims, stats = (att_hat, bias, se, CI_low, CI_up, CI_coverage)
 # dim of time array = nsims; 1
 
@@ -59,9 +58,7 @@ if(gsc==TRUE){
 if(asy==TRUE){
   results[['asy']] <- list()
 }
-if(did==TRUE){
-  results[['did']] <- list()
-}
+
 
 # extract simulated case names from data
 WW  = names(sim_data) # names of cases
@@ -101,7 +98,7 @@ for (case in 1:ncases) {
 
     # start simulations for one case
     onecase<-foreach (i=1:nsims,.combine='c', .multicombine=TRUE,.inorder=FALSE,
-                      .packages=c("gsynth", "augsynth", "did","dplyr"), .verbose = FALSE,.options.RNG = 123) %dorng% { # parallel computing
+                      .packages=c("gsynth", "augsynth", "dplyr"), .verbose = FALSE,.options.RNG = 123) %dorng% { # parallel computing
         
         ## annouce simulations
         if (i %% 200 == 0) {
@@ -170,36 +167,6 @@ for (case in 1:ncases) {
           att_e.asy <- NULL
           time_asy <- NULL
         }
-        ## DID
-        if(did==TRUE){
-        panel <- panel  |>  group_by(id)  |>  mutate(first.treat = ifelse(any(D == 1), min(time[D == 1]), 0))  |>  ungroup() # prepare data for DID
-        
-        t0_did <- Sys.time()
-        out_did <- att_gt(
-          yname = "Y",
-          gname = "first.treat",  # <-- This should be the group/treatment timing variable
-          idname = "id",
-          tname = "time",
-          xformla = ~1,
-          data = panel,
-          est_method = "data",
-          control_group = "notyettreated"
-        )
-        did_summary_att_e <- aggte(out_did, type = "dynamic")
-        t1_did <- Sys.time()
-        time_did <- as.numeric(difftime(t1_did, t0_did, units = "secs"))
-
-        att_e.did <- data.frame(
-          att = did_summary_att_e$att.egt,
-          time = did_summary_att_e$egt
-        )
-        att_e.did <- att_e.did[att_e.did$time >= 0, ]  # extract only post-treatment periods ATT
-        att_e.did <- att_e.did[, c("att")]
-        
-        } else {
-          att_e.did <- NULL
-          time_did <- NULL
-        }
 
         out = list(list(
           gsc_att_e = att_e.gsc,     # matrix
@@ -208,8 +175,6 @@ for (case in 1:ncases) {
           asy_att_e = att_e.asy,     # matrix
           asy_time  = time_asy,
 
-          did_att_e = att_e.did,     # matrix
-          did_time  = time_did
         ))
         return(out)      
   }
@@ -256,25 +221,6 @@ for (case in 1:ncases) {
     )
   }
 
-  if (did==TRUE){
-    # extract results and converts to arrays
-    did_att_e_list <- lapply(onecase, `[[`, "did_att_e")
-    did_att_e_pad <- lapply(did_att_e_list, pad_vector, nrow = S)
-    did_att_e_array <- t(simplify2array(did_att_e_pad))
-    dimnames(did_att_e_array) <- list(sim = sim_names,
-                                      event = event_names)
-
-    did_time_list  <- lapply(onecase, `[[`, "did_time")
-    did_time_array <- do.call(rbind, did_time_list)
-    rownames(did_time_array) <- sim_names
-
-    # Store results
-    results[['did']][[case_name]] <- list(
-    att_e = did_att_e_array,
-    time  = did_time_array
-    )
-  }
-  
 
   # Intermediate save after each case for safety
   # if (!dir.exists("output")) {
@@ -293,15 +239,14 @@ cat("\nRun time: ");print(Sys.time()-begin.time)
 # results would be saved in "output" folder: 
 # one csv file per case-method, one row per simulation
 
+# create output folder if it does not exist
 if (!dir.exists("output")) {
-  dir.create("output") # create output folder if it does not exist
+  dir.create("output") 
 }
 
+# save each case-method result in a csv file
 for (case in 1:ncases) {
   case_name <- WW[case]
-  # if (!dir.exists(paste0("output/", case_name))) {
-  #   dir.create(paste0("output/", case_name)) # create output folder if it does not exist
-  # }
 
   for(method in names(results)){
     method_results <- results[[method]]
@@ -312,10 +257,8 @@ for (case in 1:ncases) {
     colnames(result_array)[1:ncol(att_e_array)] <- paste('event_time', colnames(att_e_array), sep = "_")
     colnames(result_array)[(ncol(att_e_array)+1):ncol(result_array)] <- c("time_sec")
 
-    # save results: one folder per case, one file per method, one row per simulation
-    # output_filename <- paste0("output/", case_name, "/", method , "_results_" , case_name, ".csv")
-    files_previous <- list.files("output/", pattern = method) # delete previous results containing this method for any case
-    if (length(files_previous) > 0 & case == 1) file.remove(paste0("output/", files_previous)) 
+    files_previous <- list.files("output/", pattern = method)
+    if (length(files_previous) > 0 & case == 1) file.remove(paste0("output/", files_previous)) # delete previous results containing this method for any case
 
     output_filename <- paste0("output/sim_results_", case_name, "_", method , ".csv")
     write.csv(result_array, file = output_filename, row.names = FALSE)

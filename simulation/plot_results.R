@@ -11,8 +11,6 @@
 # %% Set environment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 rm(list=ls(all=TRUE))
 
-#setwd("/Users/wuhang/Desktop/metric/sc/submission/replication_files/simulation")
-
 # install.packages(c("ggplot2", "patchwork"))
 library(ggplot2)
 library(patchwork)
@@ -41,7 +39,7 @@ for (case in case_names) {
     # compute summary statistics
     att.e <- as.matrix(result[, !names(result) %in% "time_sec"]) # exclude time column
     att.e <- att.e[,1:7] #v2
-    att_true <- c(1:ncol(att.e)) # true ATT values equal to event times
+    att_true <- c(1:ncol(att.e)) # true ATT values equal to event times + 1
 
 
     rmse_att_e <- sapply(att_true, function(n) if (any(!is.na(att.e[,n]))) sqrt(mean((att.e[,n] - n)^2, na.rm = TRUE)) else NA)
@@ -49,6 +47,7 @@ for (case in case_names) {
 
     n_sims <- nrow(att.e)
 
+    # store summary results
     summary[[case]][[method]] <- list(
       rmse = rmse_att_e,
       time = elapsed_time,
@@ -65,8 +64,8 @@ for (case in case_names) {
     rmse_values <- summary[[case]][[method]]$rmse
     temp_df <- data.frame(
       case = case,
-      method = method,
-      event_time = seq_along(rmse_values),
+      method = ifelse (method == "asy", "ppsc", method), # rename "asy" to "ppsc" for clarity in plots
+      event_time = seq_along(rmse_values) -1, # event times start from 0
       rmse = rmse_values
     )
     plot_data <- rbind(plot_data, temp_df)
@@ -79,7 +78,7 @@ plot_list <- lapply(case_names, function(cname) {
 })
 names(plot_list) <- case_names
 
-save_file = 'output/Figure_simulation_results.png'
+save_file = 'output/Figure1_simulation_results.png'
 combined = combine_plots(plot_list, save_file = save_file)  # plot combining function from plot.R
 cat("\nSimulation figures saved in 'output' folder.\n")
 print(combined)

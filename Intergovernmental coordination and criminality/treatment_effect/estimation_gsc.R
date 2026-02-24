@@ -1,31 +1,36 @@
-######################
+## Empirical Study
+## Replication Materials
+
 # This R script replicates key results from the empirical study:
 # "Increasing Intergovernmental Coordination to Fight Crime: Evidence from Mexico."
 
 # It implements the Generalized Synthetic Control method (Xu, 2017) to estimate treatment effects on crime and cartel outcomes.
 # The analysis is based on the original authors' code and data, available at:
 # https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi%3A10.7910%2FDVN%2FPBTTDM
-######################
+
+## %% Set environment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 rm(list=ls())
-# Set seed -----
+# Set seed
 set.seed(1234)
 
-# Set working directory ----
-setwd("/Users/wuhang/Desktop/metric/sc/replication_files")
+# Set working directory to the folder where this script is located
+setwd("/Users/replication_files/Intergovernmental coordination and criminality/treatment_effect")
 
 
-# Packages -----
-library(pacman)
-p_load(gsynth, dplyr)
+# Packages 
+# install.packages(c("gsynth", "dplyr"))
+library(gsynth)
+library(dplyr)
 
 
 
-# %%Main analysis: outcome related to theft and homicide %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+# %% Main analysis: outcome related to theft and homicide %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 # Note: different time periods available for different outcomes
 
 # load data
-psrm_crime_data <- read.csv("data/processed/psrm_crime_data.csv")
+psrm_crime_data <- read.csv("cleaned_data/psrm_crime_data.csv")
 
 ## Theft
 #theft violent
@@ -65,7 +70,7 @@ hom.ym.out <- gsynth(hom_ym_rate ~ Policial + n.cell + n.weak + n.strong + war +
 # %% Main analysis: outcome related to cartel presence %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 # load data
-psrm_cartel_data <- read.csv("data/processed/psrm_cartel_data.csv")
+psrm_cartel_data <- read.csv("cleaned_data/psrm_cartel_data.csv")
 
 
 # cartel presence strength
@@ -129,5 +134,8 @@ war_att = war_att |> mutate(outcome='war')
 # combine all results and save
 results_gsc = rbind( hom_att1, homym_att1, vtheft_att1, nvtheft_att1, strength_att, number_att, war_att)
 results_gsc = results_gsc |> group_by(outcome) |> mutate(event_time = row_number())
-write.csv(results_gsc, "results/results_gsc.csv", row.names = FALSE)
+if (!dir.exists("output")) {
+  dir.create("output")
+}
+write.csv(results_gsc, "output/results_gsc.csv", row.names = FALSE)
 

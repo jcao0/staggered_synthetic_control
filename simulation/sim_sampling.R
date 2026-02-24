@@ -10,7 +10,6 @@
 # %% set environment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 rm(list=ls(all=TRUE))
 set.seed(123)
-# setwd("/Users/wuhang/Desktop/metric/sc/submission/replication_files/simulation")
 
 # install.packages(c("R.matlab", "doParallel", "foreach", "doRNG","MASS"))
 library(R.matlab)
@@ -58,14 +57,15 @@ for(N in NN) {
 }
 
 
-# register multiple cores
+# Register multiple cores
 cores<-8
 Sys.setenv(GOTO_NUM_THREADS=cores)
 cl<-makeCluster(cores)
 registerDoParallel(cl)
 cat("Cores: ", cores, "; cases: ", ncases, "\n", sep = "")
 begin.time <- Sys.time()
-# start simulation
+
+# Start simulation
 sim_data <- list()
 sim_data_mat <- list()  # for MATLAB-compatible structure
 for (case in 1:ncases) {

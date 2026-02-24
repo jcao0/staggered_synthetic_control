@@ -4,11 +4,14 @@
 % The script includes results estimated by Staggered Synthetic Control
 
 % Note: different time periods available for different outcomes
+
+tmp = matlab.desktop.editor.getActive;
+cd(fileparts(tmp.Filename));
 clear
 tic 
 rng(7)
 restoredefaultpath
-addpath('functions','data/processed/');
+addpath('functions','cleaned_data');
 alpha_sig = .05;
 % warning('off','all')
 
@@ -124,5 +127,7 @@ end
 
 %% collect and save results
 results_ssc= [results_hr; results_tr; results_cp];
-
-writetable(results_ssc,'results/results_ssc.csv')
+if ~exist('output', 'dir')
+    mkdir('output')
+end
+writetable(results_ssc,'output/results_ssc.csv')
