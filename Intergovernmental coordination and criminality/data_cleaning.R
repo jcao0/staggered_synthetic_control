@@ -17,7 +17,10 @@
 ## %% set environment %%%%%%%%%%%%%%%%%%%%%%%%%%
 rm(list=ls())
 
-# Packages
+ # set working directory to where this script are located
+setwd("/Users/replication_files/Intergovernmental coordination and criminality")
+
+# load packages
 # install.packages("dplyr")
 library(dplyr)
 

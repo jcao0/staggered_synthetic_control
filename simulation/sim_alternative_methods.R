@@ -2,7 +2,7 @@
 ## Replication Materials
 
 
-## This scripts produce simulation results of alternative methods for event-time ATT
+## This script produces simulation results of alternative methods for event-time ATT
 ## Alternative methods include:
 ## 1. Generalized Synthetic Control (gsc) by Xu (2017)
 ## 2. Partially Pooled Synthetic Control (ppsc) by Ben-Michael, Feller, and Rothstein (2022)
@@ -12,8 +12,11 @@
 
 # %% set environment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 rm(list=ls(all=TRUE))
-set.seed(123)
 
+# set working directory to the folder where this script is located
+setwd("/Users/replication_files/Simulation")
+
+# load packages
 # install.packages(c("dplyr", "doParallel", "parallel", "foreach", "doRNG", "gsynth","devtools"))
 # devtools::install_github("ebenmichael/augsynth")
 library(dplyr)
@@ -44,8 +47,7 @@ n_test_sim <- NULL # set NULL to run all simulations per case
 
 
 
-
-# %%Start estimation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# %% Start estimation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # estimation results would be stored in a nested list: method -> case -> att_e array + time array
 # dim of att_e array =  event-time; stats; sims, stats = (att_hat, bias, se, CI_low, CI_up, CI_coverage)
 # dim of time array = nsims; 1
@@ -173,7 +175,7 @@ for (case in 1:ncases) {
           gsc_time  = time_gsc,
 
           asy_att_e = att_e.asy,     # matrix
-          asy_time  = time_asy,
+          asy_time  = time_asy
 
         ))
         return(out)      
