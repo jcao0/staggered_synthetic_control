@@ -24,11 +24,11 @@ This repository provides replication files for the simulation studies in Cao, Lu
 ## Requirements
 
 -   R (4.5.1)
-    -   required packages: R.matlab, doParallel, foreach, doRNG, MASS, nleqslv, dplyr, parallel, gsynth, augsynth, did, ggplot2, patchwork
+    -   required packages: R.matlab, doParallel, foreach, doRNG, MASS, nleqslv, dplyr, parallel, gsynth, augsynth, ggplot2, patchwork
 -   MATLAB (R2018b)
     -   required toolbox: Optimization Toolbox
 
-## Usage
+## Replication Steps
 
 1.  **Generate Simulation Datasets:**
 
