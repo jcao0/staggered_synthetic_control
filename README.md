@@ -2,11 +2,11 @@
 
 This repository provides replication files for paper Cao, Lu, and Wu (2020), "Synthetic Control Inference for Staggered Adoption."
 
-This package replicates the main results of the paper:
+It is organized into two main components
 
--   **Figure 1** (Section 3: Simulation)
+-   **Simulation**: replication of the results in Section 3, including Figure 1.
 
--   **Table 1, Figure 2** and **Figure 3** (Section 4: Intergovernmental coordination and criminality)
+-   **Intergovernmental coordination and criminality**: replication of the results in Section 4, including Table 1, Figures 2 and Figure 3.
 
 ------------------------------------------------------------------------
 
@@ -24,23 +24,17 @@ I certify that the author(s) of the manuscript have legitimate access to and per
 
 # Replication Instructions
 
-## Section 3: Simulation Study
+## Simulation Study
 
-Access the folder `Simulation` to replicate this section. This section compares staggered synthetic control (SSC) and alternative synthetic control variants through simulation studies.
+Access the folder `Simulation` to replicate this section. The folder includes the code needed to reproduce Figure 1 that compares staggered synthetic control (SSC) and alternative synthetic control variants through simulation studies.
 
-### Computational requirements
-
-#### Software requirements
+### Software requirements
 
 -   R (4.5.1)
     -   required packages: R.matlab, doParallel, foreach, doRNG, MASS, nleqslv, dplyr, parallel, gsynth, augsynth, ggplot2, patchwork
     -   All required R packages can be installed by running command `install.packages("package_name")` The exception is augsynth, which should be installed with `devtools::install_github("ebenmichael/augsynth")`.
 -   MATLAB (R2018b)
     -   required toolbox: Optimization Toolbox
-
-#### Expected running time
-
--   Approximate time needed to reproduce the results in this section: 1-2 hours
 
 ### Replication Steps
 
@@ -59,6 +53,17 @@ Access the folder `Simulation` to replicate this section. This section compares 
     -   Use `plot_results.R` to generate **Figure 1** from the simulation results.
     -   **Figure 1** will be saved in `output/` directory
 
+### Expected Running Times
+
+Testing is conducted using MacBook Pro 2019, Intel Core i7, 16GB memory.
+
+| Program                   | Expected Running Time (seconds) |
+|---------------------------|---------------------------------|
+| sim_sampling.R            | 53                              |
+| sim_alternative_methods.R | 5417                            |
+| sim_scs.m                 | 3795                            |
+| plot_results.R            | 11                              |
+
 ### Detailed Directory Structure
 
 -   `sim_sampling.R` — R script for sampling procedures in simulations.
@@ -76,11 +81,14 @@ Access the folder `Simulation` to replicate this section. This section compares 
     -   `sampling.R` — R functions to generate simulation sample
     -   `padding_matrix.R` — R functions for storing simulation results
     -   `plot.R` — R functions for plotting
--   `output/` — Contains simulation results as CSV files, named by simulation parameters and method (e.g., `sim_results_N33_T15_r3_asy.csv`).
+-   `output/` — Contains simulation results
+    -   Estimation results as CSV files, named by simulation parameters and method (e.g., `sim_results_N33_T15_r3_asy.csv`).
+    -   `Figure1_simulation_results.png`— Figure 1 that plots simulation results
+    -   `running_time_sim_sampling.txt`, `running_time_sim_alternative_methods.txt`, `running_time_sim_scs.txt`, `running_time_plot_results.txt`— Files that record running time
 
 ------------------------------------------------------------------------
 
-## Section 4: Intergovernmental Coordination and Criminality
+## Intergovernmental Coordination and Criminality
 
 Access the folder `Intergovernmental Coordination and Criminality` to replicate this section. This section revisits the empirical analysis in Alcocer M (2025), “Increasing Intergovernmental Coordination to Fight Crime: Evidence from Mexico.”
 
@@ -92,18 +100,12 @@ The folder includes the data and code needed to reproduce the main tables and fi
 
 -   Figure 3: Treatment effects estimated using staggered synthetic control (SSC) and generalized synthetic control (GSC) methods.
 
-### Computational requirements
-
-#### Software requirements
+### Software requirements
 
 -   R (4.5.1)
     -   required packages: dplyr, gsynth, panelView, ggplot2, cowplot
 -   MATLAB (R2018b)
     -   required toolbox: Optimization Toolbox
-
-#### Expected running time
-
--   Approximate time needed to reproduce the results in this section: \<10 minutes
 
 ### Replication Steps
 
@@ -129,6 +131,19 @@ The folder includes the data and code needed to reproduce the main tables and fi
     -   Run `plot_results.m` by MATLAB.
         -   This script reproduces **Figure 3** that compares the two methods: it reads `results_ssc.csv` and `results_gsc.csv`, plots figures that compare SSC and GSC event-time ATT estimates across all outcomes.
     -   Estimation results and **Figure 3** will be saved in `treatment_effect/output/` directory.
+
+### Expected Running Times
+
+Testing is conducted using MacBook Pro 2019, Intel Core i7, 16GB memory.
+
+| Program                                  | Expected Running Time (seconds) |
+|--------------------------------------|----------------------------------|
+| data_cleaning.R                          | 2                               |
+| calculate_eigenvalue_for_design_matrix.m | 12                              |
+| plot_treatment_scheme.R                  | 4                               |
+| estimation_gsc.R                         | 315                             |
+| estimation_ssc.m                         | 10                              |
+| plot_results.m                           | 9                               |
 
 ### Detailed Directory Structure
 
@@ -160,6 +175,7 @@ The folder includes the data and code needed to reproduce the main tables and fi
     -   `output/` — Output folder for the eigenvalue calculations.
 
         -   `Table1_smallest_eigenvalue.csv` — Table 1: smallest eigenvalues of the sample analogue of the design matrix for each outcome.
+        -   `running_time_calculate_eigenvalue_for_design_matrix.txt` — Running time for eigenvalue calculation.
 
 -   `treatment_scheme/` — Contains code and data that produce Figure 2 that visualize the timing of treatment adoption.
 
@@ -169,6 +185,7 @@ The folder includes the data and code needed to reproduce the main tables and fi
     -   `plot_treatment_scheme.R` — Plot the treatment scheme for different outcome groups and save it as Figure 3.
     -   `output/` — Output folder for the treatment scheme figure.
         -   `Figure2_treatment_scheme.png` — Figure that visualizes the treatment scheme for different outcome groups.
+        -   `running_time_plot_treatment_scheme.txt` — Running time for treatment scheme plotting.
 
 -   `treatment_effect/` — Contains data and code to estimate treatment effects and to plot Figure 2.
 
@@ -196,6 +213,7 @@ The folder includes the data and code needed to reproduce the main tables and fi
         -   `results_gsc.csv` — Estimated treatment effects by `estimation_gsc.R` and related statistics from the GSC approach.
         -   `results_ssc.csv` — Estimated treatment effects by `estimation_ssc.m` and related statistics from the SSC approach.
         -   `Figure3_application_results.png` — Figure that compares the SSC and GSC approach, produced by `plot_results.m`.
+        -   `running_time_estimation_gsc.txt` , `running_time_estimation_ssc.txt`, `running_time_plot_results.txt`— Running time for GSC estimation, SSC estimation and plotting.
 
 ------------------------------------------------------------------------
 

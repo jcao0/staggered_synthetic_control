@@ -1,2 +1,2 @@
 "Running Time (seconds)"
-11.871550
+8.620220

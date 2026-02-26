@@ -15,7 +15,7 @@ begin.time <- Sys.time()
 
 # set seed for reproducibility
 RNGkind("Mersenne-Twister", "Inversion", "Rejection")
-set.seed(123)
+set.seed(1234)
 
 # set working directory to the folder where this script is located
 setwd("/Users/replication_files/Simulation")
@@ -102,7 +102,7 @@ for (case in 1:ncases) {
                        .multicombine = TRUE,
                        .inorder = FALSE,
                        .packages = c("MASS"),
-                       .options.RNG = 123 # set seed
+                       .options.RNG = 1234 # set seed
     ) %dorng% {
         # generate a random sample: 
         panel <- simulate_data_fm(N = N, T = T, S = S , r = r, AR1 = AR1,

@@ -18,7 +18,7 @@ begin.time <- Sys.time()
 
 # set seed for reproducibility
 RNGkind("Mersenne-Twister", "Inversion", "Rejection")
-set.seed(123)
+set.seed(1234)
 
 # set working directory to the folder where this script is located
 setwd("/Users/replication_files/Simulation")
@@ -106,7 +106,7 @@ for (case in 1:ncases) {
 
     # start simulations for one case
     onecase<-foreach (i=1:nsims,.combine='c', .multicombine=TRUE,.inorder=FALSE,
-                      .packages=c("gsynth", "augsynth", "dplyr"), .verbose = FALSE,.options.RNG = 123) %dorng% { # parallel computing
+                      .packages=c("gsynth", "augsynth", "dplyr"), .verbose = FALSE,.options.RNG = 1234) %dorng% { # parallel computing
         
         ## annouce simulations
         if (i %% 200 == 0) {
