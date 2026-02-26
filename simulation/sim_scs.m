@@ -2,6 +2,7 @@
 tmp = matlab.desktop.editor.getActive;
 cd(fileparts(tmp.Filename));
 clear
+t0 = tic;
 rng(7)
 restoredefaultpath
 addpath('functions','data');
@@ -14,7 +15,6 @@ data = load('sim_data.mat');
 
 
 %% START SIMULATION
-t0 = tic;
 
 %%preparation
 case_names = fieldnames(data);
@@ -77,7 +77,6 @@ for f = 1:numel(case_names)
     % save('sim_result_SSC.mat', 'ATT_struct', 'ATT_event_struct')
 end
 disp('Finished')
-toc(t0)
 
 
 %% EXTRACT RESULT AND SAVE
@@ -109,6 +108,13 @@ for f = 1:numel(case_names)
     fprintf('Case %s | saved in %s\n', case_name, file_name);
 end
 
+%%save running time
+elapsed_seconds = toc(t0);
+output_file = 'output/running_time_sim_scs.txt';
+fid = fopen(output_file, 'w');
+fprintf(fid, '"Running Time (seconds)"\n');
+fprintf(fid, '%.6f\n', elapsed_seconds);
+fclose(fid);
 
 
 

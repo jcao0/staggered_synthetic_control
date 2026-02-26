@@ -9,7 +9,7 @@
 tmp = matlab.desktop.editor.getActive;
 cd(fileparts(tmp.Filename));
 clear
-tic 
+t0 = tic;
 rng(7)
 restoredefaultpath
 addpath('functions','cleaned_data');
@@ -179,3 +179,11 @@ if ~exist('output', 'dir')
 end
 writetable(results_ssc,'output/Table1_smallest_eigenvalue.csv')
 fprintf('Results saved in /output\n');
+
+%%save running time
+elapsed_seconds = toc(t0);
+output_file = 'output/running_time_calculate_eigenvalue_for_design_matrix.txt';
+fid = fopen(output_file, 'w');
+fprintf(fid, '"Running Time (seconds)"\n');
+fprintf(fid, '%.6f\n', elapsed_seconds);
+fclose(fid);

@@ -8,7 +8,7 @@
 tmp = matlab.desktop.editor.getActive;
 cd(fileparts(tmp.Filename));
 clear
-tic 
+t0 = tic;
 rng(7)
 restoredefaultpath
 addpath('functions','cleaned_data');
@@ -131,3 +131,11 @@ if ~exist('output', 'dir')
     mkdir('output')
 end
 writetable(results_ssc,'output/results_ssc.csv')
+
+%%save running time
+elapsed_seconds = toc(t0);
+output_file = 'output/running_time_estimation_ssc.txt';
+fid = fopen(output_file, 'w');
+fprintf(fid, '"Running Time (seconds)"\n');
+fprintf(fid, '%.6f\n', elapsed_seconds);
+fclose(fid);

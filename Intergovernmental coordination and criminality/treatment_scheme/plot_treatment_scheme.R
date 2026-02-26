@@ -10,6 +10,9 @@
 ## %% Set environment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 rm(list=ls(all=TRUE))
 
+# record start time
+begin.time <- Sys.time()
+
 # set working directory to the folder where this script is located
 setwd("/Users/replication_files/Intergovernmental coordination and criminality/treatment_scheme")
 
@@ -112,4 +115,8 @@ if (!dir.exists("output")) {
   dir.create("output")
 }
 ggsave("output/Figure2_treatment_scheme.png", width = 15, height = 10, dpi = 300,  bg = "white")
+
+# save running time
+time <- Sys.time() - begin.time
+write.table(time, file = "output/running_time_plot_treatment_scheme.txt", row.names = FALSE, col.names = "Running Time (seconds)")
 

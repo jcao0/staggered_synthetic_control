@@ -7,7 +7,7 @@
 tmp = matlab.desktop.editor.getActive;
 cd(fileparts(tmp.Filename));
 clear
-tic 
+t0 = tic;
 rng(7)
 restoredefaultpath
 addpath('output');
@@ -86,3 +86,10 @@ if ~exist('output', 'dir')
 end
 print(f, 'output/Figure3_application_results.png', '-dpng', '-r300')  % high-resolution PNG
 
+%%save running time
+elapsed_seconds = toc(t0);
+output_file = 'output/running_time_plot_results.txt';
+fid = fopen(output_file, 'w');
+fprintf(fid, '"Running Time (seconds)"\n');
+fprintf(fid, '%.6f\n', elapsed_seconds);
+fclose(fid);

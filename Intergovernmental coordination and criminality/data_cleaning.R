@@ -17,7 +17,10 @@
 ## %% set environment %%%%%%%%%%%%%%%%%%%%%%%%%%
 rm(list=ls())
 
- # set working directory to where this script are located
+# record start time
+begin.time <- Sys.time()
+
+# set working directory to where this script is located
 setwd("/Users/replication_files/Intergovernmental coordination and criminality")
 
 # load packages
@@ -58,4 +61,9 @@ for (folder in folders) {
   write.csv(psrm_crime_data, file.path(folder, "cleaned_data/psrm_crime_data.csv"), row.names = FALSE)
   write.csv(psrm_cartel_data, file.path(folder, "cleaned_data/psrm_cartel_data.csv"), row.names = FALSE)
 }
+
+# running time
+time <- Sys.time() - begin.time
+cat("Data cleaning completed in ", time, " ", attr(time, "units"), ".\n", sep = "")
+
 

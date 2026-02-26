@@ -1,7 +1,7 @@
 ## Empirical Study
 ## Replication Materials
 
-# This R script replicates key results from the empirical study:
+# This R script replicates key results in Alcocer M (2025):
 # "Increasing Intergovernmental Coordination to Fight Crime: Evidence from Mexico."
 
 # It implements the Generalized Synthetic Control method (Xu, 2017) to estimate treatment effects on crime and cartel outcomes.
@@ -10,7 +10,12 @@
 
 ## %% Set environment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 rm(list=ls())
+
+# start time
+begin.time <- Sys.time()
+
 # Set seed
+RNGkind("Mersenne-Twister", "Inversion", "Rejection")
 set.seed(1234)
 
 # Set working directory to the folder where this script is located
@@ -138,4 +143,9 @@ if (!dir.exists("output")) {
   dir.create("output")
 }
 write.csv(results_gsc, "output/results_gsc.csv", row.names = FALSE)
+
+# save running time
+time <- Sys.time() - begin.time
+time <- as.numeric(time, units = "secs") # convert to seconds
+write.table(time, file = "output/running_time_estimation_gsc.txt", row.names = FALSE, col.names = "Running Time (seconds)")
 

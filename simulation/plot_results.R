@@ -11,6 +11,9 @@
 # %% Set environment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 rm(list=ls(all=TRUE))
 
+# record start time
+begin.time <- Sys.time()
+
 # set working directory to the folder where this script is located
 setwd("/Users/replication_files/Simulation")
 
@@ -83,5 +86,10 @@ save_file = 'output/Figure1_simulation_results.png'
 combined = combine_plots(plot_list, save_file = save_file)  # plot combining function from plot.R
 cat("\nSimulation figures saved in 'output' folder.\n")
 print(combined)
+
+# save running time
+time<-Sys.time()-begin.time
+time <- as.numeric(time, units = "secs") # convert to seconds
+write.table(time, file = "output/running_time_plot_results.txt", row.names = FALSE, col.names = "Running Time (seconds)")
 
 

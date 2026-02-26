@@ -10,6 +10,13 @@
 # %% set environment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 rm(list=ls(all=TRUE))
 
+# record start time
+begin.time <- Sys.time()
+
+# set seed for reproducibility
+RNGkind("Mersenne-Twister", "Inversion", "Rejection")
+set.seed(123)
+
 # set working directory to the folder where this script is located
 setwd("/Users/replication_files/Simulation")
 
@@ -26,10 +33,8 @@ source("functions/sampling.R")
 
 # Define cases  
 NN  <- c(33) # vector of target unit numbers 
-TT <- c(15) # vector of target pre-treatment periods numbers
-RR <- c(3) # vector of target latent factors numbers
-# TT <- c(15,42,157) # vector of target pre-treatment periods numbers
-# RR <- c(3,6) # vector of target latent factors numbers
+TT <- c(15,42,157) # vector of target pre-treatment periods numbers
+RR <- c(3,6) # vector of target latent factors numbers
 
 # number of simulations per case
 sims<-1000
@@ -38,7 +43,7 @@ sims<-1000
 S <- 7 # number of post-treatment periods
 FE <- TRUE # include fixed effects
 AR1 <- 0.5 # AR(1) coefficient for latent factors and time fixed effects
-mu <- 5 # constant term in the DGP
+mu <- 5 # constant term
 
 
 # %% Generate simulated data %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -51,7 +56,7 @@ ncases <- nrow(cases)
 list_A = list()
 for(N in NN) {
     repeat { # randomly generate A matrix until at least r units are treated for feasibility of gyc, and longest treatment time is S and shortest treatment time is at least 2 for results comparability
-        A = generate_treatment_matrix(N=N, S=S, seed = 136) # This seed makes sure the conditions are satisfied
+        A = generate_treatment_matrix(N=N, S=S)
         S_treat = colSums(A) # treatment times for each unit
         S_first = max(S_treat[which(colSums(A) > 0)]) # treatment periods of first treated unit
         S_last = min(S_treat[which(colSums(A) > 0)]) # treatment periods of last treated unit
@@ -68,7 +73,6 @@ Sys.setenv(GOTO_NUM_THREADS=cores)
 cl<-makeCluster(cores)
 registerDoParallel(cl)
 cat("Cores: ", cores, "; cases: ", ncases, "\n", sep = "")
-begin.time <- Sys.time()
 
 # Start simulation
 sim_data <- list()
@@ -81,8 +85,8 @@ for (case in 1:ncases) {
     A = list_A[[as.character(N)]]
 
 
-    te <- c(1:S)
-    if( S >=7 ) te[7:length(te)] = 7 # cap long-time treatment effect time at 7
+    te <- c(1:S) # treatment effect, which equals eventtime + 1
+    if( S >=7 ) te[7:length(te)] = 7 # cap long-time treatment effect at 7
 
 
     N_treated = sum(colSums(A) > 0)
@@ -130,9 +134,7 @@ for (case in 1:ncases) {
     # save(sim_data, file = "sim_data.RData") # store intermediate results to avoid loss by crashes 
 }
 stopCluster(cl) # stop parallel computing
-
-time<-Sys.time()-begin.time
-print(time)
+cat("\nSimulation completed.")
 
 # %%Save simulated data %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # check structure of simulated data
@@ -141,23 +143,25 @@ if (interactive()) {
   cat("Case names:", paste(names(sim_data), collapse = ", "), "\n")
   cat("Number of simulations in first case:", length(sim_data[[1]]), "\n")
   cat("First 5 rows of first simulated panel (first case, first sim):\n")
-  print(print(head(sim_data[[1]][[1]], 2)))
+  print(print(head(sim_data[[1]][[1]], 1)))
+}
+
+# create output folder if it does not exist
+if (!dir.exists("data")) {
+  dir.create("data") 
+}
+if (!dir.exists("output")) {
+  dir.create("output") 
 }
 
 # save simulated data
 save(sim_data,file="data/sim_data.RData")
 do.call(writeMat, c(list("data/sim_data.mat"), sim_data_mat))
 
+# save running time
+time<-Sys.time()-begin.time
+time <- as.numeric(time, units = "secs") # convert to seconds
+write.table(time, file = "output/running_time_sim_sampling.txt", row.names = FALSE, col.names = "Running Time (seconds)")
+
 print("Simulation data saved to 'sim_data.RData' and 'sim_data.mat'.")
 
-# N=33; S=7
-# for(seed in 100:200) {
-#     A = generate_treatment_matrix(N=N, S=S, seed = seed) # This seed makes sure the conditions are satisfied
-#     S_treat = colSums(A) # treatment times for each unit
-#     S_first = max(S_treat[which(colSums(A) > 0)]) # treatment periods of first treated unit
-#     S_last = min(S_treat[which(colSums(A) > 0)]) # treatment periods of last treated unit
-#     N_treated = sum(colSums(A) > 0)
-#     if(N-N_treated == 3 & S_first == 7 & S_last == 2) {
-#         cat("Seed:", seed, "; # treated units:", N_treated, "; first treated unit treatment time:", S_first, "; last treated unit treatment time:", S_last, "\n")
-#     }
-# }

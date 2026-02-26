@@ -13,6 +13,13 @@
 # %% set environment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 rm(list=ls(all=TRUE))
 
+# record start time
+begin.time <- Sys.time()
+
+# set seed for reproducibility
+RNGkind("Mersenne-Twister", "Inversion", "Rejection")
+set.seed(123)
+
 # set working directory to the folder where this script is located
 setwd("/Users/replication_files/Simulation")
 
@@ -78,7 +85,6 @@ cores<-8
 Sys.setenv(GOTO_NUM_THREADS=cores)
 cl<-makeCluster(cores)
 registerDoParallel(cl)
-begin.time<-Sys.time()
 cat("\nCores: ",cores,"; # of cases: ",ncases,"; # of sims: ",nsims,sep="")
 
 # loop
@@ -233,7 +239,7 @@ for (case in 1:ncases) {
 } # end of all cases
 stopCluster(cl) # stop parallel computing
 cat("\nEstimation completed.")
-cat("\nRun time: ");print(Sys.time()-begin.time)
+
 
 
 
@@ -266,5 +272,10 @@ for (case in 1:ncases) {
     write.csv(result_array, file = output_filename, row.names = FALSE)
   }
 }
+
+# save running time
+time <- Sys.time() - begin.time
+time <- as.numeric(time, units = "secs") # convert to seconds
+write.table(time, file = "output/running_time_sim_alternative_methods.txt", row.names = FALSE, col.names = "Running Time (seconds)")
 
 cat("\nSimulation results of alternative methods saved in 'output' folder.\n")
