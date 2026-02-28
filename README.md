@@ -1,6 +1,6 @@
 # Overview
 
-This repository provides replication files for paper Cao, Lu, and Wu (2020), "Synthetic Control Inference for Staggered Adoption."
+This repository provides replication files for paper Cao, Lu, and Wu (2025), "Synthetic Control Inference for Staggered Adoption."
 
 It is organized into two main components
 
@@ -18,7 +18,7 @@ The crime and cartel data for Guanajuato used in Section 4 are provided by Alcoc
 
 ## Statement about Rights
 
-I certify that the author(s) of the manuscript have legitimate access to and permission to use the data used in this manuscript.
+We certify that the author(s) of the manuscript have legitimate access to and permission to use the data used in this manuscript.
 
 ------------------------------------------------------------------------
 
