@@ -1,0 +1,15 @@
+Replication package license and permissions
+
+The code and documentation in this replication package were prepared by the
+authors for replication of "Synthetic Control Inference for Staggered
+Adoption" and may be used for research, teaching, and replication purposes
+with appropriate citation.
+
+The empirical data included in the package are publicly available from:
+
+Alcocer, Marco. 2024. "Replication Data for: Increasing Intergovernmental
+Coordination to Fight Crime: Evidence from Mexico." Harvard Dataverse.
+https://doi.org/10.7910/DVN/PBTTDM.
+
+No restricted or confidential data are included in this package. Use of the
+empirical data remains subject to the terms of the source repository.

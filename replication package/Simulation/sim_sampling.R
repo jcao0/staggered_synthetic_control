@@ -18,7 +18,11 @@ RNGkind("Mersenne-Twister", "Inversion", "Rejection")
 set.seed(1234)
 
 # set working directory to the folder where this script is located
-setwd("/Users/replication_files/Simulation")
+args <- commandArgs(trailingOnly = FALSE)
+file_arg <- grep("^--file=", args, value = TRUE)
+if (length(file_arg) > 0) {
+  setwd(dirname(normalizePath(sub("^--file=", "", file_arg[1]))))
+}
 
 # load packages
 # install.packages(c("R.matlab", "doParallel", "foreach", "doRNG","MASS"))
@@ -164,4 +168,3 @@ time <- as.numeric(time, units = "secs") # convert to seconds
 write.table(time, file = "output/running_time_sim_sampling.txt", row.names = FALSE, col.names = "Running Time (seconds)")
 
 print("Simulation data saved to 'sim_data.RData' and 'sim_data.mat'.")
-

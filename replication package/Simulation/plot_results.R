@@ -15,7 +15,11 @@ rm(list=ls(all=TRUE))
 begin.time <- Sys.time()
 
 # set working directory to the folder where this script is located
-setwd("/Users/replication_files/Simulation")
+args <- commandArgs(trailingOnly = FALSE)
+file_arg <- grep("^--file=", args, value = TRUE)
+if (length(file_arg) > 0) {
+  setwd(dirname(normalizePath(sub("^--file=", "", file_arg[1]))))
+}
 
 # load packages
 # install.packages(c("ggplot2", "patchwork"))
@@ -91,5 +95,4 @@ print(combined)
 time<-Sys.time()-begin.time
 time <- as.numeric(time, units = "secs") # convert to seconds
 write.table(time, file = "output/running_time_plot_results.txt", row.names = FALSE, col.names = "Running Time (seconds)")
-
 

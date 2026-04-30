@@ -21,7 +21,11 @@ RNGkind("Mersenne-Twister", "Inversion", "Rejection")
 set.seed(1234)
 
 # set working directory to the folder where this script is located
-setwd("/Users/replication_files/Simulation")
+args <- commandArgs(trailingOnly = FALSE)
+file_arg <- grep("^--file=", args, value = TRUE)
+if (length(file_arg) > 0) {
+  setwd(dirname(normalizePath(sub("^--file=", "", file_arg[1]))))
+}
 
 # load packages
 # install.packages(c("dplyr", "doParallel", "parallel", "foreach", "doRNG", "gsynth","devtools"))

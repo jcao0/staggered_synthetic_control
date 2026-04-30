@@ -1,6 +1,8 @@
 %% SET ENVIRONMENT
-tmp = matlab.desktop.editor.getActive;
-cd(fileparts(tmp.Filename));
+script_dir = fileparts(mfilename('fullpath'));
+if ~isempty(script_dir)
+    cd(script_dir);
+end
 clear
 t0 = tic;
 rng(7)
@@ -115,7 +117,6 @@ fid = fopen(output_file, 'w');
 fprintf(fid, '"Running Time (seconds)"\n');
 fprintf(fid, '%.6f\n', elapsed_seconds);
 fclose(fid);
-
 
 
 

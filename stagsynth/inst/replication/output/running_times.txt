@@ -1,0 +1,6 @@
+Running times (seconds)
+========================
+data_clean.R                         1.16 s
+figure2_treatment_scheme.R           2.58 s
+figure3_att_estimates.R              19.96 s
+table1_eigenvalue.R                  16.89 s
