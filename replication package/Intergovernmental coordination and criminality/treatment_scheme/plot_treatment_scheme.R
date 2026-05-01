@@ -14,7 +14,36 @@ rm(list=ls(all=TRUE))
 begin.time <- Sys.time()
 
 # set working directory to the folder where this script is located
-setwd("/Users/replication_files/Intergovernmental coordination and criminality/treatment_scheme")
+get_script_dir <- function() {
+  # 1) Run by Rscript / command-line
+  args <- commandArgs(trailingOnly = FALSE)
+  file_arg <- grep("^--file=", args, value = TRUE)
+  
+  if (length(file_arg) > 0) {
+    return(dirname(normalizePath(sub("^--file=", "", file_arg[1]))))
+  }
+  
+  # 2) Run by RStudio / interactive IDE
+  if (requireNamespace("rstudioapi", quietly = TRUE) &&
+      rstudioapi::isAvailable()) {
+    path <- rstudioapi::getActiveDocumentContext()$path
+    if (nzchar(path)) {
+      return(dirname(normalizePath(path)))
+    }
+  }
+  
+  # 3) Fallback
+  return(NULL)
+}
+
+script_dir <- get_script_dir()
+
+if (!is.null(script_dir)) {
+  setwd(script_dir)
+  cat("Working directory:", script_dir, "\n")
+} else {
+  message("Could not determine script directory.")
+}
 
 # packages
 # install.packages(c("panelView", "ggplot2", "cowplot", "dplyr"))
