@@ -15,7 +15,7 @@ See [`replication package/README.md`](replication%20package/README.md) for softw
 
 ## R Package
 
-The folder [`stagsynth`](stagsynth/) contains an R package for staggered synthetic control estimation and inference. The package maintainer is Zhanchao Fu<fuzhanchao2001@gmail.com>.
+The folder [`stagsynth`](stagsynth/) contains an R package for staggered synthetic control estimation and inference. The package maintainer is Zhanchao Fu(<fuzhanchao2001@gmail.com>).
 
 To install the package locally from this repository, run:
 
