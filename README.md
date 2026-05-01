@@ -29,4 +29,4 @@ or from the terminal:
 R CMD INSTALL stagsynth
 ```
 
-The main function is `ssc()`, which estimates event-time and overall average treatment effects for staggered adoption designs. The package also includes helper functions for synthetic control weights, reshaping panel data, and checking the smallest eigenvalue of the SSC design matrix.
+The main function is 'ssc()', which estimates heterogeneous, event-time, and overall average treatment effects for staggered adoption designs, and constructs placebo-in-time confidence intervals and p-values. The package also includes helper functions for synthetic control weights (synthetic_control(), synthetic_control_batch()), reshaping panel data from long format (panel_to_matrices()), and checking the smallest eigenvalue of the SSC design matrix (ssc_min_eigenvalue()). S3 methods (print, summary, plot) are provided for "ssc" objects.
