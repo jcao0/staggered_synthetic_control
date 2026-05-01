@@ -6,7 +6,7 @@ It is organized into two main components
 
 -   **Simulation**: replication of the results in Section 3, including Figure 1.
 
--   **Intergovernmental coordination and criminality**: replication of the results in Section 4, including Table 1 and Figures 2 and 3.
+-   **Intergovernmental Coordination and Criminality**: replication of the results in Section 4, including Table 1 and Figures 2 and 3.
 
 ------------------------------------------------------------------------
 
@@ -32,8 +32,8 @@ Access the folder `Simulation` to replicate this section. The folder includes th
 
 ### Software requirements
 
--   Operating system used for testing: macOS 26.3
--   R (4.5.1)
+-   Operating system used for testing: macOS 12.4
+-   R (4.5.1) and RStudio (2022.12)
     -   required packages: R.matlab, doParallel, foreach, doRNG, MASS, nleqslv, dplyr, parallel, gsynth, augsynth, ggplot2, patchwork
     -   All required R packages can be installed by running command `install.packages("package_name")` The exception is augsynth, which should be installed with `devtools::install_github("ebenmichael/augsynth")`.
 -   MATLAB (R2018b)
@@ -43,17 +43,17 @@ Access the folder `Simulation` to replicate this section. The folder includes th
 
 1.  Generate Simulation Datasets:
 
-    -   From the `Simulation` folder, run `Rscript sim_sampling.R` to create simulation datasets.
+    -   From the `Simulation` folder, run `sim_sampling.R` in RStudio to create simulation datasets.
     -   Output files will be saved in the `data/` directory.
 
 2.  Run Simulations:
 
-    -   In MATLAB, run `sim_scs.m` from the `Simulation` folder for SSC results. Then run `Rscript sim_alternative_methods.R` from the `Simulation` folder for alternative methods.
+    -   In MATLAB, run `sim_scs.m` from the `Simulation` folder for SSC results. Then run `sim_alternative_methods.R` from the `Simulation` folder in RStudio for alternative methods.
     -   Output CSV files will be saved in the `output/` directory.
 
 3.  Plot Results:
 
-    -   Run `Rscript plot_results.R` from the `Simulation` folder to generate **Figure 1** from the simulation results.
+    -   In RStudio, run `plot_results.R` from the `Simulation` folder to generate **Figure 1** from the simulation results.
     -   **Figure 1** will be saved in `output/` directory
 
 ### Expected Running Times
@@ -93,7 +93,7 @@ Testing is conducted using MacBook Pro 2019, Intel Core i7, 16GB memory.
 
 ## Intergovernmental Coordination and Criminality
 
-Access the folder `Intergovernmental coordination and criminality` to replicate this section. This section revisits the empirical analysis in Alcocer M (2025), “Increasing Intergovernmental Coordination to Fight Crime: Evidence from Mexico.”
+Access the folder `Intergovernmental_coordination_and_criminality` to replicate this section. This section revisits the empirical analysis in Alcocer M (2025), “Increasing Intergovernmental Coordination to Fight Crime: Evidence from Mexico.”
 
 The folder includes the data and code needed to reproduce the main tables and figures, specifically:
 
@@ -105,8 +105,8 @@ The folder includes the data and code needed to reproduce the main tables and fi
 
 ### Software requirements
 
--   Operating system used for testing: macOS 26.3
--   R (4.5.1)
+-   Operating system used for testing: macOS 12.4
+-   R (4.5.1) and RStudio (2022.12)
     -   required packages: dplyr, gsynth, panelView, ggplot2, cowplot
 -   MATLAB (R2018b)
     -   required toolbox: Optimization Toolbox
@@ -114,7 +114,7 @@ The folder includes the data and code needed to reproduce the main tables and fi
 ### Replication Steps
 
 1.  Prepare cleaned data (R).
-    -   From the `Intergovernmental coordination and criminality` folder, run `Rscript data_cleaning.R`.
+    -   From the `Intergovernmental_coordination_and_criminality` folder, run `data_cleaning.R` in RStudio.
         -   This script loads the raw data from `raw_data/`, applies the same sample restrictions as in the paper, and writes cleaned CSV files to `smallest_eigenvalues/cleaned_data`, `treatment_effect/cleaned_data`, and `treatment_scheme/cleaned_data`.
 2.  Compute smallest eigenvalues of the sample analogue of the design matrices (MATLAB).
     -   Open directory `smallest_eigenvalues/`.
@@ -123,12 +123,12 @@ The folder includes the data and code needed to reproduce the main tables and fi
     -   **Table 1** will be saved in `smallest_eigenvalues/output/` directory.
 3.  Visualize treatment scheme (R):
     -   Open directory `treatment_scheme/`.
-    -   From the `treatment_scheme/` folder, run `Rscript plot_treatment_scheme.R`.
+    -   From the `treatment_scheme/` folder, run `plot_treatment_scheme.R` in RStudio.
         -   This script reproduces **Figure 2**, which displays the timing of treatment adoption for homicide, theft, and cartel outcomes.
     -   **Figure 2** will be saved in `treatment_scheme/output/` directory.
 4.  Estimate treatment effects (R and MATLAB).
     -   Open directory `treatment_effect/`.
-    -   From the `treatment_effect/` folder, run `Rscript estimation_gsc.R`.
+    -   From the `treatment_effect/` folder, run `estimation_gsc.R` in RStudio.
         -   The script computes the results by GSC method. It uses the "gsynth" package and the cleaned data in `treatment_effect/cleaned_data` to compute event-time ATT estimates and confidence intervals for all outcomes, and saves `results_gsc.csv`.
     -   In MATLAB, run `estimation_ssc.m` from the `treatment_effect/` folder.
         -   The script computes the results by SSC method. It uses the SSC functions in `treatment_effect/functions` and the cleaned data in `treatment_effect/cleaned_data` to compute event-time ATT estimates and confidence intervals for all outcomes, and saves `results_ssc.csv`.
