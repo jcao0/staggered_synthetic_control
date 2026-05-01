@@ -1,8 +1,6 @@
 %% SET ENVIRONMENT
-script_dir = fileparts(mfilename('fullpath'));
-if ~isempty(script_dir)
-    cd(script_dir);
-end
+tmp = matlab.desktop.editor.getActive;
+cd(fileparts(tmp.Filename));
 clear
 t0 = tic;
 rng(7)
