@@ -6,7 +6,7 @@ It is organized into two main components
 
 -   **Simulation**: replication of the results in Section 3, including Figure 1.
 
--   **Intergovernmental Coordination and Criminality**: replication of the results in Section 4, including Table 1 and Figures 2 and 3.
+-   **Intergovernmental coordination and criminality**: replication of the results in Section 4, including Table 1 and Figures 2 and 3.
 
 ------------------------------------------------------------------------
 
@@ -93,7 +93,7 @@ Testing is conducted using MacBook Pro 2019, Intel Core i7, 16GB memory.
 
 ## Intergovernmental Coordination and Criminality
 
-Access the folder `Intergovernmental_coordination_and_criminality` to replicate this section. This section revisits the empirical analysis in Alcocer M (2025), “Increasing Intergovernmental Coordination to Fight Crime: Evidence from Mexico.”
+Access the folder `Intergovernmental coordination and criminality` to replicate this section. This section revisits the empirical analysis in Alcocer M (2025), “Increasing Intergovernmental Coordination to Fight Crime: Evidence from Mexico.”
 
 The folder includes the data and code needed to reproduce the main tables and figures, specifically:
 
@@ -114,7 +114,7 @@ The folder includes the data and code needed to reproduce the main tables and fi
 ### Replication Steps
 
 1.  Prepare cleaned data (R).
-    -   From the `Intergovernmental_coordination_and_criminality` folder, run `data_cleaning.R` in RStudio.
+    -   From the `Intergovernmental coordination and criminality` folder, run `data_cleaning.R` in RStudio.
         -   This script loads the raw data from `raw_data/`, applies the same sample restrictions as in the paper, and writes cleaned CSV files to `smallest_eigenvalues/cleaned_data`, `treatment_effect/cleaned_data`, and `treatment_scheme/cleaned_data`.
 2.  Compute smallest eigenvalues of the sample analogue of the design matrices (MATLAB).
     -   Open directory `smallest_eigenvalues/`.
