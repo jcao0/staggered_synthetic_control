@@ -13,6 +13,8 @@ The replication package has two main components:
 
 See [`replication package/README.md`](replication%20package/README.md) for software requirements, running times, data availability, and step-by-step replication instructions.
 
+For exact replication of the GSC results in Figure 3, use the archived R package `gsynth` version 1.2.1. The replication package includes [`setup_R_environment.R`](replication%20package/setup_R_environment.R), which attempts to install that version. Newer `gsynth` versions can be used, but they may produce different GSC estimates.
+
 ## R Package
 
 The folder [`stagsynth`](stagsynth/) contains an R package for staggered synthetic control estimation and inference. The package maintainer is Zhanchao Fu(<fuzhanchao2001@gmail.com>).
