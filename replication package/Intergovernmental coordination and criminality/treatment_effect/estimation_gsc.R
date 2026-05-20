@@ -42,43 +42,10 @@ if (!is.null(script_dir)) {
   message("Could not determine script directory.")
 }
 
-# Packages
-# For exact replication of the archived Figure 3 GSC results, use gsynth 1.2.1.
-# The setup script at ../../setup_R_environment.R attempts to install this
-# archived version. Newer gsynth versions can be used, but they may produce
-# different GSC estimates, especially for Figure 3 panels e and f.
+# Packages 
 # install.packages(c("gsynth", "dplyr"))
 library(gsynth)
 library(dplyr)
-
-required_gsynth_version <- "1.2.1"
-current_gsynth_version <- as.character(packageVersion("gsynth"))
-
-if (!identical(current_gsynth_version, required_gsynth_version)) {
-  warning(
-    "This replication was generated with gsynth ", required_gsynth_version,
-    ". You are using gsynth ", current_gsynth_version,
-    ". The script will continue, but Figure 3 GSC results may differ. ",
-    "For exact replication, run ../../setup_R_environment.R first.",
-    call. = FALSE
-  )
-}
-
-extract_event_time_att <- function(gsc_output, event_times, outcome) {
-  est_att <- gsc_output$est.att
-  target_rows <- as.character(seq_len(event_times))
-
-  if (all(target_rows %in% rownames(est_att))) {
-    return(est_att[target_rows, , drop = FALSE])
-  }
-
-  warning(
-    "Could not identify event-time rows by row name for outcome ", outcome,
-    ". Falling back to the final ", event_times, " rows of gsynth$est.att.",
-    call. = FALSE
-  )
-  utils::tail(est_att, event_times)
-}
 
 
 
@@ -160,32 +127,32 @@ out_war <- gsynth(war ~ policial + log_pop + log_econin + state_political_vulner
 
 # collect ATT estimates for post-treatment periods
 
-vtheft_att1 <- extract_event_time_att(theft.viol.out, 90, "theft_violent_rate")
+vtheft_att1 <- theft.viol.out$est.att[130:219,]
 vtheft_att1 = data.frame(vtheft_att1)
 vtheft_att1 = vtheft_att1 |> mutate(outcome='theft_violent_rate')
 
-nvtheft_att1 <- extract_event_time_att(theft.nonviol.out, 90, "theft_nonviolent_rate")
+nvtheft_att1 <- theft.nonviol.out$est.att[130:219,]
 nvtheft_att1 = data.frame(nvtheft_att1)
 nvtheft_att1 = nvtheft_att1 |> mutate(outcome='theft_nonviolent_rate')
 
-hom_att1 <- extract_event_time_att(hom.out, 78, "hom_all_rate")
+hom_att1 <- hom.out$est.att[195:272,]
 hom_att1 = data.frame(hom_att1)
 hom_att1 = hom_att1 |> mutate(outcome='hom_all_rate')
 
-homym_att1 <- extract_event_time_att(hom.ym.out, 78, "hom_ym_rate")
+homym_att1 <- hom.ym.out$est.att[195:272,]
 homym_att1 = data.frame(homym_att1)
 homym_att1 = homym_att1 |> mutate(outcome='hom_ym_rate')
 
 
-strength_att <- extract_event_time_att(out_strength, 7, "presence_strength")
+strength_att <- out_strength$est.att[17:23,] # extract ATT for post-treatment periods
 strength_att = data.frame(strength_att)
 strength_att = strength_att |> mutate(outcome='presence_strength')
 
-number_att <- extract_event_time_att(out_number, 7, "co_num")
+number_att <- out_number$est.att[17:23,]
 number_att = data.frame(number_att)
 number_att = number_att |> mutate(outcome='co_num')
 
-war_att <- extract_event_time_att(out_war, 7, "war")
+war_att <- out_war$est.att[17:23,]
 war_att = data.frame(war_att)
 war_att = war_att |> mutate(outcome='war')
 
@@ -201,3 +168,4 @@ write.csv(results_gsc, "output/results_gsc.csv", row.names = FALSE)
 time <- Sys.time() - begin.time
 time <- as.numeric(time, units = "secs") # convert to seconds
 write.table(time, file = "output/running_time_estimation_gsc.txt", row.names = FALSE, col.names = "Running Time (seconds)")
+

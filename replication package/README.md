@@ -36,7 +36,6 @@ Access the folder `Simulation` to replicate this section. The folder includes th
 -   R (4.5.1) and RStudio (2022.12)
     -   required packages: R.matlab, doParallel, foreach, doRNG, MASS, nleqslv, dplyr, parallel, gsynth, augsynth, ggplot2, patchwork
     -   All required R packages can be installed by running command `install.packages("package_name")` The exception is augsynth, which should be installed with `devtools::install_github("ebenmichael/augsynth")`.
-    -   For exact replication of the archived GSC results, this package uses `gsynth` version 1.2.1. Newer versions of `gsynth` can be used, but they may produce different GSC estimates.
 -   MATLAB (R2018b)
     -   required toolbox: Optimization Toolbox
 
@@ -104,14 +103,11 @@ The folder includes the data and code needed to reproduce the main tables and fi
 
 -   Figure 3: Treatment effects estimated using staggered synthetic control (SSC) and generalized synthetic control (GSC) methods.
 
-For exact replication of the archived GSC results in Figure 3, run `setup_R_environment.R` from the root of this replication package before running `treatment_effect/estimation_gsc.R`. This setup script attempts to install `gsynth` version 1.2.1, the version used to generate the archived GSC output. Newer versions of `gsynth` can be used, but they may produce different GSC estimates.
-
 ### Software requirements
 
 -   Operating system used for testing: macOS 12.4
 -   R (4.5.1) and RStudio (2022.12)
     -   required packages: dplyr, gsynth, panelView, ggplot2, cowplot
-    -   Exact replication of the GSC results in Figure 3 requires `gsynth` version 1.2.1. The file `setup_R_environment.R` attempts to install this archived version from CRAN. Users may instead run the code with a newer `gsynth` version, but newer versions can produce different GSC estimates, especially in Figure 3 panels e and f.
 -   MATLAB (R2018b)
     -   required toolbox: Optimization Toolbox
 
@@ -132,7 +128,6 @@ For exact replication of the archived GSC results in Figure 3, run `setup_R_envi
     -   **Figure 2** will be saved in `treatment_scheme/output/` directory.
 4.  Estimate treatment effects (R and MATLAB).
     -   Open directory `treatment_effect/`.
-    -   For exact replication of the archived GSC results, first run `setup_R_environment.R` from the root of this replication package. This step attempts to install `gsynth` version 1.2.1. If a newer `gsynth` version is used instead, `estimation_gsc.R` will continue after printing a warning, but the GSC results may differ from the archived outputs.
     -   From the `treatment_effect/` folder, run `estimation_gsc.R` in RStudio.
         -   The script computes the results by GSC method. It uses the "gsynth" package and the cleaned data in `treatment_effect/cleaned_data` to compute event-time ATT estimates and confidence intervals for all outcomes, and saves `results_gsc.csv`.
     -   In MATLAB, run `estimation_ssc.m` from the `treatment_effect/` folder.
@@ -167,8 +162,6 @@ Testing is conducted using MacBook Pro 2019, Intel Core i7, 16GB memory.
     -   `psrm_crime_data_raw.csv` — Non-proprietary CSV copy of `psrm_crime_data.RData`.
 
 -   `data_cleaning.R` — R script that processes the raw data in `raw_data/` and saves cleaned data to analysis folders.
-
--   `setup_R_environment.R` — Optional R setup script that attempts to install the archived `gsynth` version 1.2.1 used for exact replication of the GSC results in Figure 3.
 
 -   `smallest_eigenvalues/` — Contains data and code to compute the smallest eigenvalues of the sample analogue of the design matrices and export Table 1.
 
