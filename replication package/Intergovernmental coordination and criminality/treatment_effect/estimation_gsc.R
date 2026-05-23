@@ -42,6 +42,64 @@ if (!is.null(script_dir)) {
   message("Could not determine script directory.")
 }
 
+# Packages 
+# install.packages(c("dplyr","remotes"))
+required_gsynth_version <- "1.4.0" # Install the required gsynth version to ensure exact replication of the paper's results.
+current_gsynth_version <- if (requireNamespace("gsynth", quietly = TRUE)) {
+  as.character(utils::packageVersion("gsynth"))
+} else {
+  NA_character_
+}
+if (!identical(current_gsynth_version, required_gsynth_version)) {
+  if (!requireNamespace("remotes", quietly = TRUE)) {
+    warning(
+      "Package 'remotes' is required to install gsynth version ",
+      required_gsynth_version,
+      ". Current gsynth version: ",
+      current_gsynth_version %||% "not installed",
+      call. = FALSE
+    )
+  } else {
+    cat(
+      "Installing gsynth version ", required_gsynth_version,
+      " to ensure exact replication of the paper's results.../n"
+    )
+    tryCatch(
+      {
+        remotes::install_version(
+          "gsynth",
+          version = required_gsynth_version,
+          repos = "https://cloud.r-project.org",
+          upgrade = "never",
+          dependencies = TRUE
+        )
+      },
+      error = function(e) {
+        fallback_msg <- if (!is.na(current_gsynth_version)) {
+          paste0(
+            "\nReplication scripts may still run with installed gsynth version ",
+            current_gsynth_version,
+            ", but Figure 3 GSC results may differ."
+          )
+        } else {
+          ""
+        }
+        warning(
+          paste0(
+            "Failed to install gsynth ",
+            required_gsynth_version,
+            ": ",
+            conditionMessage(e),
+            fallback_msg
+          ),
+          call. = FALSE
+        )
+      }
+    )
+  }
+}
+library(gsynth)
+library(dplyr)
 
 # Helper function to extract event-time average treatment effects
 extract_event_time_att <- function(gsc_output, event_times, outcome) {
