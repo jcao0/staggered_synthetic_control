@@ -26,6 +26,13 @@ We certify that the author(s) have documented permission to redistribute and pub
 
 # Replication Instructions
 
+## Note on the `gsynth` version
+
+The replication package was tested with `gsynth` version 1.4.0. The code may
+run under other versions of `gsynth`, but exact numerical reproduction of the
+paper figures requires version 1.4.0. In particular, older versions such as
+`gsynth` version 1.2.1 can produce slightly different GSC results in Figure 3.
+
 ## Simulation Study
 
 Access the folder `Simulation` to replicate this section. The folder includes the code needed to reproduce Figure 1 that compares staggered synthetic control (SSC) and alternative synthetic control variants through simulation studies.
@@ -35,6 +42,7 @@ Access the folder `Simulation` to replicate this section. The folder includes th
 -   Operating system used for testing: macOS 12.4
 -   R (4.5.1) and RStudio (2022.12)
     -   required packages: R.matlab, doParallel, foreach, doRNG, MASS, nleqslv, dplyr, parallel, gsynth, augsynth, ggplot2, patchwork
+    -   The submitted replication package was tested with `gsynth` version 1.4.0.
     -   All required R packages can be installed by running command `install.packages("package_name")` The exception is augsynth, which should be installed with `devtools::install_github("ebenmichael/augsynth")`.
 -   MATLAB (R2018b)
     -   required toolbox: Optimization Toolbox
@@ -108,6 +116,7 @@ The folder includes the data and code needed to reproduce the main tables and fi
 -   Operating system used for testing: macOS 12.4
 -   R (4.5.1) and RStudio (2022.12)
     -   required packages: dplyr, gsynth, panelView, ggplot2, cowplot
+    -   The submitted replication package was tested with `gsynth` version 1.4.0. Older versions of `gsynth`, including version 1.2.1, may still run but can produce slightly different GSC estimates in Figure 3.
 -   MATLAB (R2018b)
     -   required toolbox: Optimization Toolbox
 
