@@ -26,12 +26,11 @@ We certify that the author(s) have documented permission to redistribute and pub
 
 # Replication Instructions
 
-## Note on the `gsynth` version
+## Software and `gsynth` version note
 
-The replication package was tested with `gsynth` version 1.4.0. The code may
-run under other versions of `gsynth`, but exact numerical reproduction of the
-paper figures requires version 1.4.0. In particular, older versions such as
-`gsynth` version 1.2.1 can produce slightly different GSC results in Figure 3.
+The current verification of the revised Figure 3 was run on macOS 26.4.1 (arm64) with R 4.5.2 and MATLAB R2026a Update 2. RStudio is not required; the R scripts can be run from RStudio or from an R console/terminal.
+
+The submitted replication package was tested with `gsynth` version 1.4.0. The code may run under other versions of `gsynth`, but exact numerical reproduction of the GSC estimates in Figure 3 requires version 1.4.0. Older versions, including version 1.2.1, can produce different GSC estimates.
 
 ## Simulation Study
 
@@ -39,34 +38,34 @@ Access the folder `Simulation` to replicate this section. The folder includes th
 
 ### Software requirements
 
--   Operating system used for testing: macOS 12.4
--   R (4.5.1) and RStudio (2022.12)
+-   Current local environment used for this revision check: macOS 26.4.1 (arm64)
+-   R (4.5.2); RStudio is optional
     -   required packages: R.matlab, doParallel, foreach, doRNG, MASS, nleqslv, dplyr, parallel, gsynth, augsynth, ggplot2, patchwork
-    -   The submitted replication package was tested with `gsynth` version 1.4.0.
+    -   Use `gsynth` version 1.4.0 for exact reproduction of the submitted results; see the software and `gsynth` version note above.
     -   All required R packages can be installed by running command `install.packages("package_name")` The exception is augsynth, which should be installed with `devtools::install_github("ebenmichael/augsynth")`.
--   MATLAB (R2018b)
+-   MATLAB (R2026a Update 2)
     -   required toolbox: Optimization Toolbox
 
 ### Replication Steps
 
 1.  Generate Simulation Datasets:
 
-    -   From the `Simulation` folder, run `sim_sampling.R` in RStudio to create simulation datasets.
+    -   From the `Simulation` folder, run `sim_sampling.R` in R or RStudio to create simulation datasets.
     -   Output files will be saved in the `data/` directory.
 
 2.  Run Simulations:
 
-    -   In MATLAB, run `sim_scs.m` from the `Simulation` folder for SSC results. Then run `sim_alternative_methods.R` from the `Simulation` folder in RStudio for alternative methods.
+    -   In MATLAB, run `sim_scs.m` from the `Simulation` folder for SSC results. Then run `sim_alternative_methods.R` from the `Simulation` folder in R or RStudio for alternative methods.
     -   Output CSV files will be saved in the `output/` directory.
 
 3.  Plot Results:
 
-    -   In RStudio, run `plot_results.R` from the `Simulation` folder to generate **Figure 1** from the simulation results.
+    -   In R or RStudio, run `plot_results.R` from the `Simulation` folder to generate **Figure 1** from the simulation results.
     -   **Figure 1** will be saved in `output/` directory
 
 ### Expected Running Times
 
-Testing is conducted using MacBook Pro 2019, Intel Core i7, 16GB memory.
+The running times below were recorded in the original replication benchmark using MacBook Pro 2019, Intel Core i7, 16GB memory.
 
 | Program                   | Expected Running Time (seconds) |
 |---------------------------|---------------------------------|
@@ -113,17 +112,17 @@ The folder includes the data and code needed to reproduce the main tables and fi
 
 ### Software requirements
 
--   Operating system used for testing: macOS 12.4
--   R (4.5.1) and RStudio (2022.12)
+-   Current local environment used for this revision check: macOS 26.4.1 (arm64)
+-   R (4.5.2); RStudio is optional
     -   required packages: dplyr, gsynth, panelView, ggplot2, cowplot
-    -   The submitted replication package was tested with `gsynth` version 1.4.0. Older versions of `gsynth`, including version 1.2.1, may still run but can produce slightly different GSC estimates in Figure 3.
--   MATLAB (R2018b)
+    -   The submitted replication package was tested with `gsynth` version 1.4.0. Older versions of `gsynth`, including version 1.2.1, may still run but can produce different GSC estimates in Figure 3.
+-   MATLAB (R2026a Update 2)
     -   required toolbox: Optimization Toolbox
 
 ### Replication Steps
 
 1.  Prepare cleaned data (R).
-    -   From the `Intergovernmental coordination and criminality` folder, run `data_cleaning.R` in RStudio.
+    -   From the `Intergovernmental coordination and criminality` folder, run `data_cleaning.R` in R or RStudio.
         -   This script loads the raw data from `raw_data/`, applies the same sample restrictions as in the paper, and writes cleaned CSV files to `smallest_eigenvalues/cleaned_data`, `treatment_effect/cleaned_data`, and `treatment_scheme/cleaned_data`.
 2.  Compute smallest eigenvalues of the sample analogue of the design matrices (MATLAB).
     -   Open directory `smallest_eigenvalues/`.
@@ -132,12 +131,12 @@ The folder includes the data and code needed to reproduce the main tables and fi
     -   **Table 1** will be saved in `smallest_eigenvalues/output/` directory.
 3.  Visualize treatment scheme (R):
     -   Open directory `treatment_scheme/`.
-    -   From the `treatment_scheme/` folder, run `plot_treatment_scheme.R` in RStudio.
+    -   From the `treatment_scheme/` folder, run `plot_treatment_scheme.R` in R or RStudio.
         -   This script reproduces **Figure 2**, which displays the timing of treatment adoption for homicide, theft, and cartel outcomes.
     -   **Figure 2** will be saved in `treatment_scheme/output/` directory.
 4.  Estimate treatment effects (R and MATLAB).
     -   Open directory `treatment_effect/`.
-    -   From the `treatment_effect/` folder, run `estimation_gsc.R` in RStudio.
+    -   From the `treatment_effect/` folder, run `estimation_gsc.R` in R or RStudio.
         -   The script computes the results by GSC method. It uses the "gsynth" package and the cleaned data in `treatment_effect/cleaned_data` to compute event-time ATT estimates and confidence intervals for all outcomes, and saves `results_gsc.csv`.
     -   In MATLAB, run `estimation_ssc.m` from the `treatment_effect/` folder.
         -   The script computes the results by SSC method. It uses the SSC functions in `treatment_effect/functions` and the cleaned data in `treatment_effect/cleaned_data` to compute event-time ATT estimates and confidence intervals for all outcomes, and saves `results_ssc.csv`.
@@ -147,7 +146,7 @@ The folder includes the data and code needed to reproduce the main tables and fi
 
 ### Expected Running Times
 
-Testing is conducted using MacBook Pro 2019, Intel Core i7, 16GB memory.
+The running times below were recorded in the original replication benchmark using MacBook Pro 2019, Intel Core i7, 16GB memory.
 
 | Program                                  | Expected Running Time (seconds) |
 |--------------------------------------|----------------------------------|
